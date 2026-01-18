@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2E7D32">
+  <meta name="description" content="Controle de finanças pessoais">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Controle de Finanças</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <h1 id="page-title">Dashboard</h1>
+      <button id="theme-toggle" class="btn-icon" aria-label="Alternar tema">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Screen -->
+      <section id="screen-dashboard" class="screen active">
+        <div class="balance-card">
+          <span class="balance-label">Saldo Atual</span>
+          <span id="current-balance" class="balance-value">R$ 0,00</span>
+        </div>
+
+        <div class="summary-cards">
+          <div class="summary-card savings">
+            <span class="summary-label">Guardado</span>
+            <span id="total-savings" class="summary-value">R$ 0,00</span>
+          </div>
+          <div class="summary-card income">
+            <span class="summary-label">Receitas</span>
+            <span id="total-income" class="summary-value">R$ 0,00</span>
+          </div>
+          <div class="summary-card expense">
+            <span class="summary-label">Despesas</span>
+            <span id="total-expense" class="summary-value">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Gastos por Categoria</h3>
+          <canvas id="dashboard-chart"></canvas>
+          <p id="no-expenses-msg" class="empty-message">Nenhuma despesa registrada</p>
+        </div>
+
+        <div class="goal-preview" id="goal-preview" style="display: none;">
+          <h3>Meta de Economia</h3>
+          <div class="goal-progress-container">
+            <div class="goal-info">
+              <span id="goal-current">R$ 0,00</span>
+              <span id="goal-target">de R$ 0,00</span>
+            </div>
+            <div class="progress-bar">
+              <div id="goal-progress-bar" class="progress-fill"></div>
+            </div>
+            <span id="goal-percentage" class="goal-percentage">0%</span>
+          </div>
+        </div>
+
+        <div class="recent-transactions">
+          <h3>Transações Recentes</h3>
+          <ul id="recent-list" class="transaction-list"></ul>
+          <p id="no-transactions-msg" class="empty-message">Nenhuma transação registrada</p>
+        </div>
+      </section>
+
+      <!-- Transactions Screen -->
+      <section id="screen-transactions" class="screen">
+        <form id="transaction-form" class="transaction-form">
+          <h3 id="form-title">Nova Transação</h3>
+          <input type="hidden" id="transaction-id">
+
+          <div class="form-group">
+            <label>Tipo</label>
+            <div class="type-toggle">
+              <button type="button" class="type-btn active" data-type="income">Receita</button>
+              <button type="button" class="type-btn" data-type="expense">Despesa</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="transaction-value">Valor (R$)</label>
+            <input type="number" id="transaction-value" step="0.01" min="0.01" required placeholder="0,00">
+          </div>
+
+          <div class="form-group">
+            <label for="transaction-description">Descrição</label>
+            <input type="text" id="transaction-description" required placeholder="Ex: Salário, Mercado...">
+          </div>
+
+          <div class="form-group">
+            <label for="transaction-category">Categoria</label>
+            <select id="transaction-category" required>
+              <option value="">Selecione...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="transaction-date">Data</label>
+            <input type="date" id="transaction-date" required>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-edit" class="btn btn-secondary" style="display: none;">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+
+        <div class="transactions-list-container">
+          <div class="list-header">
+            <h3>Todas as Transações</h3>
+            <div class="filter-group">
+              <select id="filter-month">
+                <option value="">Todos os meses</option>
+              </select>
+            </div>
+          </div>
+          <ul id="transactions-list" class="transaction-list"></ul>
+          <p id="no-filtered-transactions" class="empty-message" style="display: none;">Nenhuma transação encontrada</p>
+        </div>
+      </section>
+
+      <!-- Reports Screen -->
+      <section id="screen-reports" class="screen">
+        <div class="report-filters">
+          <select id="report-month">
+            <option value="">Todos os meses</option>
+          </select>
+        </div>
+
+        <div class="report-summary">
+          <div class="report-card">
+            <span class="report-label">Total Receitas</span>
+            <span id="report-income" class="report-value income">R$ 0,00</span>
+          </div>
+          <div class="report-card">
+            <span class="report-label">Total Despesas</span>
+            <span id="report-expense" class="report-value expense">R$ 0,00</span>
+          </div>
+          <div class="report-card">
+            <span class="report-label">Saldo</span>
+            <span id="report-balance" class="report-value">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Despesas por Categoria</h3>
+          <canvas id="category-chart"></canvas>
+          <p id="no-category-data" class="empty-message" style="display: none;">Sem dados para exibir</p>
+        </div>
+
+        <div class="chart-container">
+          <h3>Receitas vs Despesas</h3>
+          <canvas id="comparison-chart"></canvas>
+        </div>
+
+        <div class="category-breakdown">
+          <h3>Detalhamento por Categoria</h3>
+          <ul id="category-list" class="category-list"></ul>
+        </div>
+      </section>
+
+      <!-- Goals Screen -->
+      <section id="screen-goals" class="screen">
+        <form id="goal-form" class="goal-form">
+          <h3>Definir Meta de Economia</h3>
+
+          <div class="form-group">
+            <label for="goal-value">Meta Mensal (R$)</label>
+            <input type="number" id="goal-value" step="0.01" min="0" placeholder="0,00">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Salvar Meta</button>
+        </form>
+
+        <div class="goal-status" id="goal-status">
+          <h3>Progresso da Meta</h3>
+          <div class="goal-card">
+            <div class="goal-header">
+              <span class="goal-month" id="goal-month-label">Este mês</span>
+              <span class="goal-target-value" id="goal-target-value">Meta: R$ 0,00</span>
+            </div>
+
+            <div class="goal-progress-large">
+              <div class="progress-bar large">
+                <div id="goal-progress-large" class="progress-fill"></div>
+              </div>
+              <div class="goal-numbers">
+                <span id="goal-saved">Economizado: R$ 0,00</span>
+                <span id="goal-percent">0%</span>
+              </div>
+            </div>
+
+            <div class="goal-message" id="goal-message"></div>
+          </div>
+        </div>
+
+        <div class="goal-history">
+          <h3>Histórico de Metas</h3>
+          <ul id="goal-history-list" class="goal-history-list"></ul>
+          <p id="no-goal-history" class="empty-message">Nenhum histórico disponível</p>
+        </div>
+      </section>
+
+      <!-- Settings Screen -->
+      <section id="screen-settings" class="screen">
+        <div class="settings-section">
+          <h3>Saldo Guardado</h3>
+          <p class="settings-description">Informe quanto você já tem guardado (poupança, investimentos, etc.)</p>
+          <form id="savings-form" class="savings-form">
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <input type="number" id="savings-value" step="0.01" min="0" placeholder="0,00">
+              </div>
+              <button type="submit" class="btn btn-primary btn-small">Salvar</button>
+            </div>
+          </form>
+          <p id="current-savings-display" class="current-savings">Saldo guardado atual: <strong>R$ 0,00</strong></p>
+        </div>
+
+        <div class="settings-section">
+          <h3>Gerenciar Categorias</h3>
+
+          <form id="category-form" class="category-form">
+            <div class="form-row">
+              <input type="text" id="new-category-name" placeholder="Nome da categoria" required>
+              <input type="color" id="new-category-color" value="#6B7280">
+              <button type="submit" class="btn btn-primary btn-small">Adicionar</button>
+            </div>
+          </form>
+
+          <ul id="categories-list" class="categories-list"></ul>
+        </div>
+
+        <div class="settings-section">
+          <h3>Dados</h3>
+          <div class="data-actions">
+            <button id="export-data" class="btn btn-secondary">Exportar Dados</button>
+            <button id="import-data" class="btn btn-secondary">Importar Dados</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <button id="clear-data" class="btn btn-danger">Limpar Todos os Dados</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Sobre</h3>
+          <p class="about-text">
+            Controle de Finanças v1.0<br>
+            Aplicativo para gerenciamento de finanças pessoais.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-screen="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Início</span>
+      </button>
+      <button class="nav-btn" data-screen="transactions">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="1" x2="12" y2="23"></line>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        <span>Transações</span>
+      </button>
+      <button class="nav-btn" data-screen="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Relatórios</span>
+      </button>
+      <button class="nav-btn" data-screen="goals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <circle cx="12" cy="12" r="6"></circle>
+          <circle cx="12" cy="12" r="2"></circle>
+        </svg>
+        <span>Metas</span>
+      </button>
+      <button class="nav-btn" data-screen="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Config</span>
+      </button>
+    </nav>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" class="modal">
+      <div class="modal-content">
+        <h3 id="modal-title">Confirmar</h3>
+        <p id="modal-message">Tem certeza?</p>
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn btn-secondary">Cancelar</button>
+          <button id="modal-confirm" class="btn btn-danger">Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
