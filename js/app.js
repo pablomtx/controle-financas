@@ -85,6 +85,11 @@ const App = {
       this.saveGoal();
     });
 
+    // Cancelar edição de meta
+    document.getElementById('cancel-goal').addEventListener('click', () => {
+      UI.resetGoalForm();
+    });
+
     // Formulário de categoria
     document.getElementById('category-form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -135,19 +140,21 @@ const App = {
   refreshAll() {
     const balance = Storage.calculateBalance();
     const transactions = Storage.getTransactions();
-    const goal = Storage.getGoals();
+    const goals = Storage.getGoals();
     const categories = Storage.getCategories();
     const months = Storage.getAvailableMonths();
 
     // Dashboard
     UI.updateBalance(balance);
     UI.updateRecentTransactions(transactions);
-    UI.updateGoalPreview(goal, this.getCurrentMonthBalance());
 
     // Transações
     UI.updateTransactionsList(transactions);
     UI.updateMonthFilters(months);
     UI.updateCategorySelect(categories, this.currentTransactionType);
+
+    // Metas
+    UI.updateGoalsList(goals);
 
     // Gráficos
     Charts.updateAllCharts();
@@ -250,56 +257,59 @@ const App = {
 
   // ===== Metas =====
   saveGoal() {
-    const value = parseFloat(document.getElementById('goal-value').value) || 0;
-    Storage.setMonthlyGoal(value);
+    const id = document.getElementById('goal-id').value;
+    const name = document.getElementById('goal-name').value.trim();
+    const targetAmount = parseFloat(document.getElementById('goal-value').value);
+    const months = parseInt(document.getElementById('goal-months').value);
 
-    if (value > 0) {
-      UI.showToast('Meta salva!', 'success');
-    } else {
-      UI.showToast('Meta removida', 'info');
+    if (!name || !targetAmount || !months) {
+      UI.showToast('Preencha todos os campos', 'error');
+      return;
     }
 
-    this.updateGoals();
+    if (id) {
+      // Editando meta existente
+      const existingGoal = Storage.getGoalById(id);
+      Storage.updateGoal(id, { name, targetAmount, months });
+      UI.showToast('Meta atualizada!', 'success');
+    } else {
+      // Nova meta
+      Storage.addGoal({ name, targetAmount, months });
+      UI.showToast('Meta criada!', 'success');
+    }
+
+    UI.resetGoalForm();
     this.refreshAll();
   },
 
-  updateGoals() {
-    const goal = Storage.getGoals();
-    const monthlyBalance = this.getCurrentMonthBalance();
-
-    UI.updateGoalStatus(goal, monthlyBalance);
-    UI.updateGoalHistory(goal.history);
-
-    // Atualiza histórico se estiver em um novo mês
-    this.checkAndUpdateGoalHistory();
+  editGoal(id) {
+    const goal = Storage.getGoalById(id);
+    if (goal) {
+      UI.fillGoalForm(goal);
+      document.getElementById('goal-form').scrollIntoView({ behavior: 'smooth' });
+    }
   },
 
-  checkAndUpdateGoalHistory() {
-    const goal = Storage.getGoals();
-    if (!goal.monthly || goal.monthly <= 0) return;
-
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth()).padStart(2, '0')}`;
-
-    // Verifica se já existe registro do mês atual
-    const hasCurrentMonth = goal.history.some(h => h.month === currentMonth);
-
-    if (!hasCurrentMonth && now.getDate() > 1) {
-      // Adiciona registro do mês anterior se existir
-      const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const prevMonthKey = `${prevMonth.getFullYear()}-${String(prevMonth.getMonth()).padStart(2, '0')}`;
-
-      const hasPrevMonth = goal.history.some(h => h.month === prevMonthKey);
-
-      if (!hasPrevMonth) {
-        const prevBalance = Storage.calculateMonthlyBalance(prevMonth.getFullYear(), prevMonth.getMonth());
-        Storage.addGoalHistory({
-          month: prevMonthKey,
-          target: goal.monthly,
-          saved: prevBalance.balance
-        });
+  confirmDeleteGoal(id) {
+    UI.showModal(
+      'Excluir Meta',
+      'Tem certeza que deseja excluir esta meta?',
+      () => {
+        Storage.deleteGoal(id);
+        UI.showToast('Meta excluída!', 'success');
+        this.refreshAll();
       }
-    }
+    );
+  },
+
+  updateGoals() {
+    const goals = Storage.getGoals();
+    UI.updateGoalsList(goals);
+  },
+
+  addToGoal(goalId, amount) {
+    Storage.addAmountToGoal(goalId, amount);
+    this.refreshAll();
   },
 
   // ===== Categorias =====

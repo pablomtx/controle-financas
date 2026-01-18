@@ -116,30 +116,53 @@ const Storage = {
   // ===== Metas =====
   getGoals() {
     const data = localStorage.getItem(this.KEYS.GOALS);
-    return data ? JSON.parse(data) : { monthly: 0, history: [] };
+    return data ? JSON.parse(data) : [];
   },
 
   saveGoals(goals) {
     localStorage.setItem(this.KEYS.GOALS, JSON.stringify(goals));
   },
 
-  setMonthlyGoal(value) {
+  addGoal(goal) {
     const goals = this.getGoals();
-    goals.monthly = value;
+    goal.id = this.generateId();
+    goal.createdAt = new Date().toISOString();
+    goal.currentAmount = 0;
+    goals.push(goal);
     this.saveGoals(goals);
-    return goals;
+    return goal;
   },
 
-  addGoalHistory(entry) {
+  updateGoal(id, updates) {
     const goals = this.getGoals();
-    // Remove entrada existente do mesmo mês
-    goals.history = goals.history.filter(h => h.month !== entry.month);
-    goals.history.push(entry);
-    // Mantém apenas os últimos 12 meses
-    goals.history.sort((a, b) => new Date(b.month) - new Date(a.month));
-    goals.history = goals.history.slice(0, 12);
-    this.saveGoals(goals);
-    return goals;
+    const index = goals.findIndex(g => g.id === id);
+    if (index !== -1) {
+      goals[index] = { ...goals[index], ...updates };
+      this.saveGoals(goals);
+      return goals[index];
+    }
+    return null;
+  },
+
+  deleteGoal(id) {
+    const goals = this.getGoals();
+    const filtered = goals.filter(g => g.id !== id);
+    this.saveGoals(filtered);
+    return filtered;
+  },
+
+  getGoalById(id) {
+    const goals = this.getGoals();
+    return goals.find(g => g.id === id);
+  },
+
+  addAmountToGoal(id, amount) {
+    const goal = this.getGoalById(id);
+    if (goal) {
+      goal.currentAmount = (goal.currentAmount || 0) + amount;
+      return this.updateGoal(id, { currentAmount: goal.currentAmount });
+    }
+    return null;
   },
 
   // ===== Configurações =====

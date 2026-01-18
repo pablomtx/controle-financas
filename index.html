@@ -66,20 +66,6 @@
           <p id="no-expenses-msg" class="empty-message">Nenhuma despesa registrada</p>
         </div>
 
-        <div class="goal-preview" id="goal-preview" style="display: none;">
-          <h3>Meta de Economia</h3>
-          <div class="goal-progress-container">
-            <div class="goal-info">
-              <span id="goal-current">R$ 0,00</span>
-              <span id="goal-target">de R$ 0,00</span>
-            </div>
-            <div class="progress-bar">
-              <div id="goal-progress-bar" class="progress-fill"></div>
-            </div>
-            <span id="goal-percentage" class="goal-percentage">0%</span>
-          </div>
-        </div>
-
         <div class="recent-transactions">
           <h3>Transações Recentes</h3>
           <ul id="recent-list" class="transaction-list"></ul>
@@ -186,42 +172,41 @@
       <!-- Goals Screen -->
       <section id="screen-goals" class="screen">
         <form id="goal-form" class="goal-form">
-          <h3>Definir Meta de Economia</h3>
+          <h3 id="goal-form-title">Nova Meta</h3>
+          <input type="hidden" id="goal-id">
 
           <div class="form-group">
-            <label for="goal-value">Meta Mensal (R$)</label>
-            <input type="number" id="goal-value" step="0.01" min="0" placeholder="0,00">
+            <label for="goal-name">Nome da Meta</label>
+            <input type="text" id="goal-name" placeholder="Ex: Viagem, Celular novo..." required>
           </div>
 
-          <button type="submit" class="btn btn-primary">Salvar Meta</button>
+          <div class="form-group">
+            <label for="goal-value">Valor (R$)</label>
+            <input type="number" id="goal-value" step="0.01" min="0.01" placeholder="0,00" required>
+          </div>
+
+          <div class="form-group">
+            <label for="goal-months">Prazo (meses)</label>
+            <select id="goal-months" required>
+              <option value="1">1 mês</option>
+              <option value="2">2 meses</option>
+              <option value="3">3 meses</option>
+              <option value="6">6 meses</option>
+              <option value="12">12 meses (1 ano)</option>
+              <option value="24">24 meses (2 anos)</option>
+            </select>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="cancel-goal" class="btn btn-secondary" style="display: none;">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Meta</button>
+          </div>
         </form>
 
-        <div class="goal-status" id="goal-status">
-          <h3>Progresso da Meta</h3>
-          <div class="goal-card">
-            <div class="goal-header">
-              <span class="goal-month" id="goal-month-label">Este mês</span>
-              <span class="goal-target-value" id="goal-target-value">Meta: R$ 0,00</span>
-            </div>
-
-            <div class="goal-progress-large">
-              <div class="progress-bar large">
-                <div id="goal-progress-large" class="progress-fill"></div>
-              </div>
-              <div class="goal-numbers">
-                <span id="goal-saved">Economizado: R$ 0,00</span>
-                <span id="goal-percent">0%</span>
-              </div>
-            </div>
-
-            <div class="goal-message" id="goal-message"></div>
-          </div>
-        </div>
-
-        <div class="goal-history">
-          <h3>Histórico de Metas</h3>
-          <ul id="goal-history-list" class="goal-history-list"></ul>
-          <p id="no-goal-history" class="empty-message">Nenhum histórico disponível</p>
+        <div class="goals-list-container">
+          <h3>Minhas Metas</h3>
+          <ul id="goals-list" class="goals-list"></ul>
+          <p id="no-goals-msg" class="empty-message">Nenhuma meta cadastrada</p>
         </div>
       </section>
 

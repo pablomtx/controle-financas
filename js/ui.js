@@ -273,53 +273,11 @@ const UI = {
   },
 
   // ===== Metas =====
-  updateGoalStatus(goal, monthlyBalance) {
-    const saved = monthlyBalance.balance;
-    const target = goal.monthly;
+  updateGoalsList(goals) {
+    const list = document.getElementById('goals-list');
+    const emptyMsg = document.getElementById('no-goals-msg');
 
-    if (!target || target <= 0) {
-      document.getElementById('goal-status').style.display = 'none';
-      return;
-    }
-
-    document.getElementById('goal-status').style.display = 'block';
-
-    const now = new Date();
-    const monthLabel = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-
-    document.getElementById('goal-month-label').textContent = monthLabel;
-    document.getElementById('goal-target-value').textContent = `Meta: ${this.formatCurrency(target)}`;
-
-    const percent = Math.min((saved / target) * 100, 100);
-    document.getElementById('goal-progress-large').style.width = `${Math.max(0, percent)}%`;
-    document.getElementById('goal-saved').textContent = `Economizado: ${this.formatCurrency(Math.max(0, saved))}`;
-    document.getElementById('goal-percent').textContent = `${Math.round(percent)}%`;
-
-    // Preenche o input com o valor atual da meta
-    document.getElementById('goal-value').value = target;
-
-    // Mensagem de status
-    const messageEl = document.getElementById('goal-message');
-    if (percent >= 100) {
-      messageEl.textContent = 'Parabéns! Você atingiu sua meta!';
-      messageEl.className = 'goal-message success';
-    } else if (percent >= 75) {
-      messageEl.textContent = 'Quase lá! Continue economizando!';
-      messageEl.className = 'goal-message warning';
-    } else if (percent > 0) {
-      messageEl.textContent = `Faltam ${this.formatCurrency(target - saved)} para sua meta`;
-      messageEl.className = 'goal-message info';
-    } else {
-      messageEl.textContent = 'Suas despesas superaram suas receitas este mês';
-      messageEl.className = 'goal-message warning';
-    }
-  },
-
-  updateGoalHistory(history) {
-    const list = document.getElementById('goal-history-list');
-    const emptyMsg = document.getElementById('no-goal-history');
-
-    if (history.length === 0) {
+    if (goals.length === 0) {
       list.innerHTML = '';
       emptyMsg.style.display = 'block';
       return;
@@ -327,17 +285,68 @@ const UI = {
 
     emptyMsg.style.display = 'none';
 
-    list.innerHTML = history.map(h => {
-      const achieved = h.saved >= h.target;
+    list.innerHTML = goals.map(goal => {
+      const percent = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+      const isCompleted = percent >= 100;
+      const monthlyAmount = goal.targetAmount / goal.months;
+      const endDate = new Date(goal.createdAt);
+      endDate.setMonth(endDate.getMonth() + goal.months);
+      const remainingMonths = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24 * 30)));
+
       return `
-        <li class="goal-history-item">
-          <span class="goal-history-month">${this.formatMonthYear(h.month)}</span>
-          <span class="goal-history-status ${achieved ? 'achieved' : 'not-achieved'}">
-            ${achieved ? 'Meta atingida' : 'Não atingida'} - ${this.formatCurrency(h.saved)} / ${this.formatCurrency(h.target)}
-          </span>
+        <li class="goal-item ${isCompleted ? 'completed' : ''}">
+          <div class="goal-item-header">
+            <div class="goal-item-info">
+              <h4>${goal.name} ${isCompleted ? '<span class="goal-badge">CONCLUÍDA</span>' : ''}</h4>
+              <span class="goal-details">${goal.months} ${goal.months === 1 ? 'mês' : 'meses'} • ${remainingMonths > 0 ? `Faltam ${remainingMonths} meses` : 'Prazo encerrado'}</span>
+            </div>
+            <div class="goal-item-actions">
+              <button onclick="App.editGoal('${goal.id}')" title="Editar">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+              <button class="delete" onclick="App.confirmDeleteGoal('${goal.id}')" title="Excluir">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="goal-item-numbers">
+            <span class="saved">${this.formatCurrency(goal.currentAmount)}</span>
+            <span class="target">de ${this.formatCurrency(goal.targetAmount)}</span>
+          </div>
+          <div class="goal-item-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${percent}%"></div>
+            </div>
+          </div>
+          <div class="goal-item-footer">
+            <span>Guardar <span class="monthly">${this.formatCurrency(monthlyAmount)}/mês</span></span>
+            <span>${Math.round(percent)}% concluído</span>
+          </div>
         </li>
       `;
     }).join('');
+  },
+
+  resetGoalForm() {
+    document.getElementById('goal-form').reset();
+    document.getElementById('goal-id').value = '';
+    document.getElementById('goal-form-title').textContent = 'Nova Meta';
+    document.getElementById('cancel-goal').style.display = 'none';
+  },
+
+  fillGoalForm(goal) {
+    document.getElementById('goal-id').value = goal.id;
+    document.getElementById('goal-name').value = goal.name;
+    document.getElementById('goal-value').value = goal.targetAmount;
+    document.getElementById('goal-months').value = goal.months;
+    document.getElementById('goal-form-title').textContent = 'Editar Meta';
+    document.getElementById('cancel-goal').style.display = 'block';
   },
 
   // ===== Formulário de Transação =====
