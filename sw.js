@@ -1,15 +1,15 @@
-const CACHE_NAME = 'financas-v1';
+const CACHE_NAME = 'financas-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/style.css',
-  '/js/app.js',
-  '/js/storage.js',
-  '/js/charts.js',
-  '/js/ui.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  './',
+  './index.html',
+  './css/style.css',
+  './js/app.js',
+  './js/storage.js',
+  './js/charts.js',
+  './js/ui.js',
+  './manifest.json',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   'https://cdn.jsdelivr.net/npm/chart.js'
 ];
 
@@ -76,7 +76,7 @@ self.addEventListener('fetch', (event) => {
           .catch(() => {
             // Retorna página offline se disponível
             if (event.request.destination === 'document') {
-              return caches.match('/index.html');
+              return caches.match('./index.html');
             }
           });
       })
