@@ -823,6 +823,45 @@ body {
   color: var(--primary);
 }
 
+/* Sync Styles */
+.sync-config .form-group {
+  margin-bottom: 0.5rem;
+}
+
+.sync-config .settings-description a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.sync-actions .sync-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--income-light);
+  border-radius: 8px;
+}
+
+.sync-actions .sync-status #sync-status-text {
+  color: var(--income);
+  font-weight: 500;
+}
+
+.sync-actions .last-sync {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.sync-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sync-buttons .btn {
+  flex: 1;
+}
+
 .categories-list {
   list-style: none;
 }

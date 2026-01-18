@@ -1,10 +1,11 @@
-const CACHE_NAME = 'financas-v4';
+const CACHE_NAME = 'financas-v5';
 const urlsToCache = [
   './',
   './index.html',
   './css/style.css',
   './js/app.js',
   './js/storage.js',
+  './js/sync.js',
   './js/charts.js',
   './js/ui.js',
   './manifest.json',

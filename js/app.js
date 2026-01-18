@@ -120,6 +120,19 @@ const App = {
     document.getElementById('clear-data').addEventListener('click', () => {
       this.confirmClearData();
     });
+
+    // Sincronização
+    document.getElementById('save-token').addEventListener('click', () => {
+      this.setupSync();
+    });
+
+    document.getElementById('sync-now').addEventListener('click', () => {
+      this.syncNow();
+    });
+
+    document.getElementById('remove-sync').addEventListener('click', () => {
+      this.removeSync();
+    });
   },
 
   onScreenChange(screen) {
@@ -133,6 +146,7 @@ const App = {
     } else if (screen === 'settings') {
       UI.updateCategoriesList(Storage.getCategories());
       this.updateSavingsDisplay();
+      this.updateSyncStatus();
     }
   },
 
@@ -438,6 +452,76 @@ const App = {
         UI.showToast('Todos os dados foram excluídos', 'success');
         this.refreshAll();
         UI.switchScreen('dashboard');
+      }
+    );
+  },
+
+  // ===== Sincronização =====
+  updateSyncStatus() {
+    const notConfigured = document.getElementById('sync-not-configured');
+    const configured = document.getElementById('sync-configured');
+    const lastSyncEl = document.getElementById('last-sync');
+
+    if (Sync.isConfigured()) {
+      notConfigured.style.display = 'none';
+      configured.style.display = 'block';
+
+      const lastSync = Sync.getLastSyncFormatted();
+      if (lastSync) {
+        lastSyncEl.textContent = `Última sincronização: ${lastSync}`;
+      }
+    } else {
+      notConfigured.style.display = 'block';
+      configured.style.display = 'none';
+    }
+  },
+
+  async setupSync() {
+    const token = document.getElementById('github-token').value.trim();
+
+    if (!token) {
+      UI.showToast('Digite o token do GitHub', 'error');
+      return;
+    }
+
+    UI.showToast('Configurando...', 'info');
+
+    const result = await Sync.setup(token);
+
+    if (result.success) {
+      UI.showToast(`Conectado como ${result.username}!`, 'success');
+      document.getElementById('github-token').value = '';
+      this.updateSyncStatus();
+
+      // Sincroniza automaticamente
+      await this.syncNow();
+    } else {
+      UI.showToast(result.error || 'Erro ao configurar', 'error');
+    }
+  },
+
+  async syncNow() {
+    UI.showToast('Sincronizando...', 'info');
+
+    const result = await Sync.sync();
+
+    if (result.success) {
+      UI.showToast('Sincronizado!', 'success');
+      this.refreshAll();
+      this.updateSyncStatus();
+    } else {
+      UI.showToast(result.error || 'Erro ao sincronizar', 'error');
+    }
+  },
+
+  removeSync() {
+    UI.showModal(
+      'Desconectar Sincronização',
+      'Seus dados locais serão mantidos, mas não serão mais sincronizados. Deseja continuar?',
+      () => {
+        Sync.removeConfig();
+        UI.showToast('Sincronização desconectada', 'success');
+        this.updateSyncStatus();
       }
     );
   }
