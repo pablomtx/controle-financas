@@ -361,12 +361,14 @@ const App = {
 
   showAddFromSavings(goalId, remaining) {
     const goal = Storage.getGoalById(goalId);
+    const savings = Storage.getSavings();
 
     if (!goal) return;
 
     const modal = document.getElementById('savings-modal');
     document.getElementById('savings-modal-goal-id').value = goalId;
     document.getElementById('savings-modal-info').innerHTML = `
+      <strong>Saldo Guardado:</strong> ${UI.formatCurrency(savings)}<br>
       <strong>Meta:</strong> ${goal.name}<br>
       <strong>Faltam:</strong> ${UI.formatCurrency(remaining)}
     `;
