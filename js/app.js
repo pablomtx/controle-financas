@@ -5,10 +5,19 @@ const App = {
   currentTransactionType: 'income',
 
   // ===== Inicialização =====
-  init() {
+  async init() {
     this.registerServiceWorker();
     this.initTheme();
     this.bindEvents();
+
+    // Sincroniza ao carregar (busca dados da nuvem)
+    if (Sync.isConfigured()) {
+      const result = await Sync.syncOnLoad();
+      if (result.success) {
+        console.log('Dados sincronizados da nuvem');
+      }
+    }
+
     this.refreshAll();
     this.setDefaultDate();
     UI.initMoneyMasks();
@@ -140,6 +149,15 @@ const App = {
     document.getElementById('remove-sync').addEventListener('click', () => {
       this.removeSync();
     });
+
+    // Modal de adicionar do saldo guardado
+    document.getElementById('savings-modal-confirm').addEventListener('click', () => {
+      this.confirmAddFromSavings();
+    });
+
+    document.getElementById('savings-modal-cancel').addEventListener('click', () => {
+      this.closeSavingsModal();
+    });
   },
 
   onScreenChange(screen) {
@@ -225,6 +243,7 @@ const App = {
     UI.resetTransactionForm();
     this.currentTransactionType = 'income';
     this.refreshAll();
+    Sync.autoSync();
   },
 
   editTransaction(id) {
@@ -248,6 +267,7 @@ const App = {
         Storage.deleteTransaction(id);
         UI.showToast('Transação excluída!', 'success');
         this.refreshAll();
+        Sync.autoSync();
       }
     );
   },
@@ -303,6 +323,7 @@ const App = {
 
     UI.resetGoalForm();
     this.refreshAll();
+    Sync.autoSync();
   },
 
   editGoal(id) {
@@ -321,6 +342,7 @@ const App = {
         Storage.deleteGoal(id);
         UI.showToast('Meta excluída!', 'success');
         this.refreshAll();
+        Sync.autoSync();
       }
     );
   },
@@ -333,6 +355,58 @@ const App = {
   addToGoal(goalId, amount) {
     Storage.addAmountToGoal(goalId, amount);
     this.refreshAll();
+    Sync.autoSync();
+  },
+
+  showAddFromSavings(goalId, remaining) {
+    const savings = Storage.getSavings();
+    const goal = Storage.getGoalById(goalId);
+
+    if (!goal) return;
+
+    const modal = document.getElementById('savings-modal');
+    document.getElementById('savings-modal-goal-id').value = goalId;
+    document.getElementById('savings-modal-info').innerHTML = `
+      <strong>Saldo Guardado:</strong> ${UI.formatCurrency(savings)}<br>
+      <strong>Faltam para a meta:</strong> ${UI.formatCurrency(remaining)}
+    `;
+    document.getElementById('savings-modal-value').value = '';
+    modal.classList.add('active');
+  },
+
+  confirmAddFromSavings() {
+    const goalId = document.getElementById('savings-modal-goal-id').value;
+    const value = UI.parseMoneyValue(document.getElementById('savings-modal-value').value);
+    const savings = Storage.getSavings();
+    const goal = Storage.getGoalById(goalId);
+
+    if (!value || value <= 0) {
+      UI.showToast('Digite um valor válido', 'error');
+      return;
+    }
+
+    if (value > savings) {
+      UI.showToast('Valor maior que o saldo guardado', 'error');
+      return;
+    }
+
+    const remaining = goal.targetAmount - goal.currentAmount;
+    const toAdd = Math.min(value, remaining);
+
+    // Subtrai do saldo guardado
+    Storage.setSavings(savings - toAdd);
+
+    // Adiciona à meta
+    Storage.addAmountToGoal(goalId, toAdd);
+
+    document.getElementById('savings-modal').classList.remove('active');
+    UI.showToast(`${UI.formatCurrency(toAdd)} transferido para a meta!`, 'success');
+    this.refreshAll();
+    Sync.autoSync();
+  },
+
+  closeSavingsModal() {
+    document.getElementById('savings-modal').classList.remove('active');
   },
 
   // ===== Categorias =====
@@ -351,6 +425,7 @@ const App = {
     document.getElementById('new-category-name').value = '';
     UI.updateCategoriesList(Storage.getCategories());
     UI.updateCategorySelect(Storage.getCategories(), this.currentTransactionType);
+    Sync.autoSync();
   },
 
   confirmDeleteCategory(id) {
@@ -365,6 +440,7 @@ const App = {
           UI.showToast('Categoria excluída!', 'success');
           UI.updateCategoriesList(Storage.getCategories());
           UI.updateCategorySelect(Storage.getCategories(), this.currentTransactionType);
+          Sync.autoSync();
         }
       }
     );
@@ -391,6 +467,7 @@ const App = {
     UI.showToast('Despesa fixa adicionada!', 'success');
     UI.resetFixedExpenseForm();
     UI.updateFixedExpensesList(Storage.getFixedExpenses());
+    Sync.autoSync();
   },
 
   confirmDeleteFixedExpense(id) {
@@ -401,6 +478,7 @@ const App = {
         Storage.deleteFixedExpense(id);
         UI.showToast('Despesa fixa excluída!', 'success');
         UI.updateFixedExpensesList(Storage.getFixedExpenses());
+        Sync.autoSync();
       }
     );
   },
@@ -412,6 +490,7 @@ const App = {
     UI.showToast('Saldo guardado atualizado!', 'success');
     this.updateSavingsDisplay();
     this.refreshAll();
+    Sync.autoSync();
   },
 
   updateSavingsDisplay() {

@@ -327,6 +327,8 @@ const UI = {
 
     emptyMsg.style.display = 'none';
 
+    const savings = Storage.getSavings();
+
     list.innerHTML = goals.map(goal => {
       const percent = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
       const isCompleted = percent >= 100;
@@ -334,6 +336,7 @@ const UI = {
       const endDate = new Date(goal.createdAt);
       endDate.setMonth(endDate.getMonth() + goal.months);
       const remainingMonths = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24 * 30)));
+      const remaining = goal.targetAmount - goal.currentAmount;
 
       return `
         <li class="goal-item ${isCompleted ? 'completed' : ''}">
@@ -370,6 +373,17 @@ const UI = {
             <span>Guardar <span class="monthly">${this.formatCurrency(monthlyAmount)}/mês</span></span>
             <span>${Math.round(percent)}% concluído</span>
           </div>
+          ${!isCompleted && savings > 0 ? `
+          <div class="goal-add-savings">
+            <button class="btn btn-secondary btn-small" onclick="App.showAddFromSavings('${goal.id}', ${remaining})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Adicionar do Saldo Guardado
+            </button>
+          </div>
+          ` : ''}
         </li>
       `;
     }).join('');

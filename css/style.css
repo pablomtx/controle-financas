@@ -989,6 +989,30 @@ body {
   margin-bottom: 0.75rem;
 }
 
+/* ===== Goal Add Savings ===== */
+.goal-add-savings {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+}
+
+.goal-add-savings .btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.savings-modal-info {
+  background: var(--background);
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
 .data-actions {
   display: flex;
   flex-direction: column;

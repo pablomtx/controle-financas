@@ -230,5 +230,33 @@ const Sync = {
 
     const date = new Date(config.lastSync);
     return date.toLocaleString('pt-BR');
+  },
+
+  // Sincronização automática em background (só push)
+  async autoSync() {
+    if (!this.isConfigured()) return;
+
+    try {
+      await this.push();
+      console.log('Auto-sync: dados enviados');
+    } catch (error) {
+      console.error('Auto-sync erro:', error);
+    }
+  },
+
+  // Sincronização ao iniciar o app (pull para pegar dados novos)
+  async syncOnLoad() {
+    if (!this.isConfigured()) return { success: false };
+
+    try {
+      const result = await this.pull();
+      if (result.success) {
+        console.log('Sync on load: dados atualizados');
+      }
+      return result;
+    } catch (error) {
+      console.error('Sync on load erro:', error);
+      return { success: false, error: error.message };
+    }
   }
 };

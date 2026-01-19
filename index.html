@@ -374,6 +374,23 @@
       </div>
     </div>
 
+    <!-- Modal Adicionar do Saldo Guardado -->
+    <div id="savings-modal" class="modal">
+      <div class="modal-content">
+        <h3>Adicionar do Saldo Guardado</h3>
+        <input type="hidden" id="savings-modal-goal-id">
+        <p id="savings-modal-info" class="savings-modal-info"></p>
+        <div class="form-group">
+          <label for="savings-modal-value">Valor a transferir (R$)</label>
+          <input type="number" id="savings-modal-value" step="0.01" min="0.01" placeholder="0,00">
+        </div>
+        <div class="modal-actions">
+          <button id="savings-modal-cancel" class="btn btn-secondary">Cancelar</button>
+          <button id="savings-modal-confirm" class="btn btn-primary">Transferir</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
   </div>
