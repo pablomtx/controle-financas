@@ -370,14 +370,14 @@ const App = {
 
   showAddFromSavings(goalId, remaining) {
     const goal = Storage.getGoalById(goalId);
-    const savings = Storage.getSavings();
+    const availableSavings = this.getAvailableSavings();
 
     if (!goal) return;
 
     const modal = document.getElementById('savings-modal');
     document.getElementById('savings-modal-goal-id').value = goalId;
     document.getElementById('savings-modal-info').innerHTML = `
-      <strong>Saldo Guardado:</strong> ${UI.formatCurrency(savings)}<br>
+      <strong>Disponível para alocar:</strong> ${UI.formatCurrency(availableSavings)}<br>
       <strong>Meta:</strong> ${goal.name}<br>
       <strong>Faltam:</strong> ${UI.formatCurrency(remaining)}
     `;
@@ -388,7 +388,7 @@ const App = {
   confirmAddFromSavings() {
     const goalId = document.getElementById('savings-modal-goal-id').value;
     const value = UI.parseMoneyValue(document.getElementById('savings-modal-value').value);
-    const savings = Storage.getSavings();
+    const availableSavings = this.getAvailableSavings();
     const goal = Storage.getGoalById(goalId);
 
     if (!value || value <= 0) {
@@ -396,24 +396,29 @@ const App = {
       return;
     }
 
-    if (value > savings) {
-      UI.showToast('Valor maior que o saldo guardado', 'error');
+    if (value > availableSavings) {
+      UI.showToast('Valor maior que o saldo disponível', 'error');
       return;
     }
 
     const remaining = goal.targetAmount - goal.currentAmount;
     const toAdd = Math.min(value, remaining);
 
-    // Subtrai do saldo guardado
-    Storage.setSavings(savings - toAdd);
-
-    // Adiciona à meta
+    // Adiciona à meta (não subtrai do saldo guardado, apenas aloca)
     Storage.addAmountToGoal(goalId, toAdd);
 
     document.getElementById('savings-modal').classList.remove('active');
-    UI.showToast(`${UI.formatCurrency(toAdd)} transferido para a meta!`, 'success');
+    UI.showToast(`${UI.formatCurrency(toAdd)} alocado na meta!`, 'success');
     this.refreshAll();
     Sync.autoSync();
+  },
+
+  // Calcula saldo guardado disponível (total - já alocado nas metas)
+  getAvailableSavings() {
+    const savings = Storage.getSavings();
+    const goals = Storage.getGoals();
+    const allocated = goals.reduce((sum, goal) => sum + (goal.currentAmount || 0), 0);
+    return Math.max(0, savings - allocated);
   },
 
   closeSavingsModal() {
