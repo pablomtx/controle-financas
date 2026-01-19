@@ -115,6 +115,7 @@ const Sync = {
       goals: Storage.getGoals(),
       savings: Storage.getSavings(),
       settings: Storage.getSettings(),
+      fixedExpenses: Storage.getFixedExpenses(),
       syncedAt: new Date().toISOString()
     };
   },
@@ -193,6 +194,7 @@ const Sync = {
       if (data.goals) Storage.saveGoals(data.goals);
       if (data.savings !== undefined) Storage.setSavings(data.savings);
       if (data.settings) Storage.saveSettings(data.settings);
+      if (data.fixedExpenses) Storage.saveFixedExpenses(data.fixedExpenses);
 
       // Atualiza última sincronização
       config.lastSync = new Date().toISOString();

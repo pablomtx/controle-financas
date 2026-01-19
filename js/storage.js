@@ -7,7 +7,8 @@ const Storage = {
     CATEGORIES: 'financas_categories',
     GOALS: 'financas_goals',
     SETTINGS: 'financas_settings',
-    SAVINGS: 'financas_savings'
+    SAVINGS: 'financas_savings',
+    FIXED_EXPENSES: 'financas_fixed_expenses'
   },
 
   // Categorias padrão
@@ -193,6 +194,48 @@ const Storage = {
     return value;
   },
 
+  // ===== Despesas Fixas =====
+  getFixedExpenses() {
+    const data = localStorage.getItem(this.KEYS.FIXED_EXPENSES);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveFixedExpenses(expenses) {
+    localStorage.setItem(this.KEYS.FIXED_EXPENSES, JSON.stringify(expenses));
+  },
+
+  addFixedExpense(expense) {
+    const expenses = this.getFixedExpenses();
+    expense.id = this.generateId();
+    expense.createdAt = new Date().toISOString();
+    expenses.push(expense);
+    this.saveFixedExpenses(expenses);
+    return expense;
+  },
+
+  updateFixedExpense(id, updates) {
+    const expenses = this.getFixedExpenses();
+    const index = expenses.findIndex(e => e.id === id);
+    if (index !== -1) {
+      expenses[index] = { ...expenses[index], ...updates };
+      this.saveFixedExpenses(expenses);
+      return expenses[index];
+    }
+    return null;
+  },
+
+  deleteFixedExpense(id) {
+    const expenses = this.getFixedExpenses();
+    const filtered = expenses.filter(e => e.id !== id);
+    this.saveFixedExpenses(filtered);
+    return filtered;
+  },
+
+  getFixedExpenseById(id) {
+    const expenses = this.getFixedExpenses();
+    return expenses.find(e => e.id === id);
+  },
+
   // ===== Cálculos =====
   calculateBalance() {
     const transactions = this.getTransactions();
@@ -302,6 +345,7 @@ const Storage = {
       goals: this.getGoals(),
       settings: this.getSettings(),
       savings: this.getSavings(),
+      fixedExpenses: this.getFixedExpenses(),
       exportedAt: new Date().toISOString()
     };
   },
@@ -322,6 +366,9 @@ const Storage = {
     if (data.savings !== undefined) {
       this.setSavings(data.savings);
     }
+    if (data.fixedExpenses) {
+      this.saveFixedExpenses(data.fixedExpenses);
+    }
   },
 
   clearAllData() {
@@ -330,5 +377,6 @@ const Storage = {
     localStorage.removeItem(this.KEYS.GOALS);
     localStorage.removeItem(this.KEYS.SETTINGS);
     localStorage.removeItem(this.KEYS.SAVINGS);
+    localStorage.removeItem(this.KEYS.FIXED_EXPENSES);
   }
 };

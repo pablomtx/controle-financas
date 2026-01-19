@@ -11,6 +11,7 @@ const App = {
     this.bindEvents();
     this.refreshAll();
     this.setDefaultDate();
+    UI.initMoneyMasks();
   },
 
   registerServiceWorker() {
@@ -96,6 +97,12 @@ const App = {
       this.addCategory();
     });
 
+    // Formulário de despesa fixa
+    document.getElementById('fixed-expense-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      this.saveFixedExpense();
+    });
+
     // Formulário de saldo guardado
     document.getElementById('savings-form').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -145,6 +152,8 @@ const App = {
       this.updateGoals();
     } else if (screen === 'settings') {
       UI.updateCategoriesList(Storage.getCategories());
+      UI.updateFixedExpensesList(Storage.getFixedExpenses());
+      UI.updateFixedExpenseCategorySelect(Storage.getCategories());
       this.updateSavingsDisplay();
       this.updateSyncStatus();
     }
@@ -185,7 +194,7 @@ const App = {
   // ===== Transações =====
   saveTransaction() {
     const id = document.getElementById('transaction-id').value;
-    const value = parseFloat(document.getElementById('transaction-value').value);
+    const value = UI.parseMoneyValue(document.getElementById('transaction-value').value);
     const description = document.getElementById('transaction-description').value.trim();
     const category = document.getElementById('transaction-category').value;
     const date = document.getElementById('transaction-date').value;
@@ -273,7 +282,7 @@ const App = {
   saveGoal() {
     const id = document.getElementById('goal-id').value;
     const name = document.getElementById('goal-name').value.trim();
-    const targetAmount = parseFloat(document.getElementById('goal-value').value);
+    const targetAmount = UI.parseMoneyValue(document.getElementById('goal-value').value);
     const months = parseInt(document.getElementById('goal-months').value);
 
     if (!name || !targetAmount || !months) {
@@ -361,9 +370,44 @@ const App = {
     );
   },
 
+  // ===== Despesas Fixas =====
+  saveFixedExpense() {
+    const description = document.getElementById('fixed-expense-description').value.trim();
+    const value = UI.parseMoneyValue(document.getElementById('fixed-expense-value').value);
+    const category = document.getElementById('fixed-expense-category').value;
+    const dueDay = parseInt(document.getElementById('fixed-expense-day').value);
+
+    if (!description || !value || !category || !dueDay) {
+      UI.showToast('Preencha todos os campos', 'error');
+      return;
+    }
+
+    if (dueDay < 1 || dueDay > 31) {
+      UI.showToast('Dia deve ser entre 1 e 31', 'error');
+      return;
+    }
+
+    Storage.addFixedExpense({ description, value, category, dueDay });
+    UI.showToast('Despesa fixa adicionada!', 'success');
+    UI.resetFixedExpenseForm();
+    UI.updateFixedExpensesList(Storage.getFixedExpenses());
+  },
+
+  confirmDeleteFixedExpense(id) {
+    UI.showModal(
+      'Excluir Despesa Fixa',
+      'Tem certeza que deseja excluir esta despesa fixa?',
+      () => {
+        Storage.deleteFixedExpense(id);
+        UI.showToast('Despesa fixa excluída!', 'success');
+        UI.updateFixedExpensesList(Storage.getFixedExpenses());
+      }
+    );
+  },
+
   // ===== Saldo Guardado =====
   saveSavings() {
-    const value = parseFloat(document.getElementById('savings-value').value) || 0;
+    const value = UI.parseMoneyValue(document.getElementById('savings-value').value);
     Storage.setSavings(value);
     UI.showToast('Saldo guardado atualizado!', 'success');
     this.updateSavingsDisplay();

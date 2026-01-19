@@ -47,6 +47,48 @@ const UI = {
     }).format(value);
   },
 
+  // Máscara de moeda para input
+  applyMoneyMask(input) {
+    input.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value === '') {
+        e.target.value = '';
+        return;
+      }
+      value = (parseInt(value) / 100).toFixed(2);
+      e.target.value = value;
+    });
+
+    input.addEventListener('focus', (e) => {
+      if (e.target.value === '0.00' || e.target.value === '') {
+        e.target.value = '';
+      }
+    });
+
+    input.addEventListener('blur', (e) => {
+      if (e.target.value === '') {
+        e.target.value = '';
+      }
+    });
+  },
+
+  // Inicializa máscaras em todos os campos de valor
+  initMoneyMasks() {
+    const moneyInputs = document.querySelectorAll('input[type="number"][step="0.01"]');
+    moneyInputs.forEach(input => {
+      input.type = 'text';
+      input.inputMode = 'numeric';
+      input.placeholder = '0,00';
+      this.applyMoneyMask(input);
+    });
+  },
+
+  // Converte valor formatado para número
+  parseMoneyValue(value) {
+    if (!value) return 0;
+    return parseFloat(value.replace(',', '.')) || 0;
+  },
+
   formatDate(dateString) {
     const date = new Date(dateString + 'T00:00:00');
     return date.toLocaleDateString('pt-BR');
@@ -343,7 +385,7 @@ const UI = {
   fillGoalForm(goal) {
     document.getElementById('goal-id').value = goal.id;
     document.getElementById('goal-name').value = goal.name;
-    document.getElementById('goal-value').value = goal.targetAmount;
+    document.getElementById('goal-value').value = parseFloat(goal.targetAmount).toFixed(2);
     document.getElementById('goal-months').value = goal.months;
     document.getElementById('goal-form-title').textContent = 'Editar Meta';
     document.getElementById('cancel-goal').style.display = 'block';
@@ -369,7 +411,7 @@ const UI = {
 
   fillTransactionForm(transaction) {
     document.getElementById('transaction-id').value = transaction.id;
-    document.getElementById('transaction-value').value = transaction.value;
+    document.getElementById('transaction-value').value = parseFloat(transaction.value).toFixed(2);
     document.getElementById('transaction-description').value = transaction.description;
     document.getElementById('transaction-date').value = transaction.date;
     document.getElementById('form-title').textContent = 'Editar Transação';
@@ -427,6 +469,60 @@ const UI = {
     setTimeout(() => {
       toast.classList.remove('show');
     }, 3000);
+  },
+
+  // ===== Despesas Fixas =====
+  updateFixedExpensesList(expenses) {
+    const list = document.getElementById('fixed-expenses-list');
+    const emptyMsg = document.getElementById('no-fixed-expenses-msg');
+
+    if (expenses.length === 0) {
+      list.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+
+    emptyMsg.style.display = 'none';
+    const categories = Storage.getCategories();
+
+    list.innerHTML = expenses.map(expense => {
+      const category = categories.find(c => c.id === expense.category) || { name: 'Outros', color: '#607D8B', icon: '📦' };
+      return `
+        <li class="fixed-expense-item">
+          <div class="fixed-expense-info">
+            <span class="fixed-expense-icon" style="background: ${category.color}">${category.icon || '📦'}</span>
+            <div class="fixed-expense-details">
+              <span class="fixed-expense-description">${expense.description}</span>
+              <span class="fixed-expense-meta">${category.name} • Dia ${expense.dueDay}</span>
+            </div>
+          </div>
+          <div class="fixed-expense-actions">
+            <span class="fixed-expense-value">${this.formatCurrency(expense.value)}</span>
+            <button class="delete-fixed-expense" onclick="App.confirmDeleteFixedExpense('${expense.id}')" title="Excluir">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </li>
+      `;
+    }).join('');
+  },
+
+  updateFixedExpenseCategorySelect(categories) {
+    const select = document.getElementById('fixed-expense-category');
+    const expenseCategories = categories.filter(c =>
+      !['salario', 'investimentos'].includes(c.id)
+    );
+
+    select.innerHTML = `<option value="">Categoria</option>` +
+      expenseCategories.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
+  },
+
+  resetFixedExpenseForm() {
+    document.getElementById('fixed-expense-form').reset();
+    document.getElementById('fixed-expense-id').value = '';
   },
 
   // ===== Tema =====

@@ -227,6 +227,40 @@
         </div>
 
         <div class="settings-section">
+          <h3>Despesas Fixas</h3>
+          <p class="settings-description">Adicione despesas que se repetem todo mês (aluguel, internet, etc.)</p>
+
+          <form id="fixed-expense-form" class="fixed-expense-form">
+            <input type="hidden" id="fixed-expense-id">
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="fixed-expense-description" placeholder="Descrição" required>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <input type="number" id="fixed-expense-value" step="0.01" min="0.01" placeholder="Valor (R$)" required>
+              </div>
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <select id="fixed-expense-category" required>
+                  <option value="">Categoria</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label for="fixed-expense-day">Dia do vencimento</label>
+                <input type="number" id="fixed-expense-day" min="1" max="31" placeholder="1-31" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-small">Adicionar</button>
+            </div>
+          </form>
+
+          <ul id="fixed-expenses-list" class="fixed-expenses-list"></ul>
+          <p id="no-fixed-expenses-msg" class="empty-message">Nenhuma despesa fixa cadastrada</p>
+        </div>
+
+        <div class="settings-section">
           <h3>Gerenciar Categorias</h3>
 
           <form id="category-form" class="category-form">
