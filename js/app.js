@@ -388,6 +388,7 @@ const App = {
   confirmAddFromSavings() {
     const goalId = document.getElementById('savings-modal-goal-id').value;
     const value = UI.parseMoneyValue(document.getElementById('savings-modal-value').value);
+    const savings = Storage.getSavings();
     const goal = Storage.getGoalById(goalId);
 
     if (!value || value <= 0) {
@@ -395,14 +396,22 @@ const App = {
       return;
     }
 
+    if (value > savings) {
+      UI.showToast('Valor maior que o saldo guardado', 'error');
+      return;
+    }
+
     const remaining = goal.targetAmount - goal.currentAmount;
     const toAdd = Math.min(value, remaining);
 
-    // Adiciona à meta (sem subtrair do saldo guardado)
+    // Subtrai do saldo guardado
+    Storage.setSavings(savings - toAdd);
+
+    // Adiciona à meta
     Storage.addAmountToGoal(goalId, toAdd);
 
     document.getElementById('savings-modal').classList.remove('active');
-    UI.showToast(`${UI.formatCurrency(toAdd)} adicionado à meta!`, 'success');
+    UI.showToast(`${UI.formatCurrency(toAdd)} transferido para a meta!`, 'success');
     this.refreshAll();
     Sync.autoSync();
   },
