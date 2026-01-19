@@ -712,18 +712,26 @@ body {
 
 .goal-item-numbers {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }
 
 .goal-item-numbers .saved {
   color: var(--primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .goal-item-numbers .target {
   color: var(--text-secondary);
+}
+
+.goal-item-numbers .remaining {
+  width: 100%;
+  color: var(--expense);
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .goal-item-footer {

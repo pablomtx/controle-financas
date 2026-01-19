@@ -167,6 +167,7 @@ const App = {
     } else if (screen === 'reports') {
       this.updateReports();
     } else if (screen === 'goals') {
+      UI.resetGoalForm();
       this.updateGoals();
     } else if (screen === 'settings') {
       UI.updateCategoriesList(Storage.getCategories());

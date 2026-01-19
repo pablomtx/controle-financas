@@ -361,6 +361,7 @@ const UI = {
           <div class="goal-item-numbers">
             <span class="saved">${this.formatCurrency(goal.currentAmount)}</span>
             <span class="target">de ${this.formatCurrency(goal.targetAmount)}</span>
+            ${!isCompleted ? `<span class="remaining">Faltam ${this.formatCurrency(remaining)}</span>` : ''}
           </div>
           <div class="goal-item-progress">
             <div class="progress-bar">
