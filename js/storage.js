@@ -236,7 +236,7 @@ const Storage = {
     return expenses.find(e => e.id === id);
   },
 
-  // Gera transações das despesas fixas para o mês atual
+  // Gera transações das despesas fixas desde o mês de início até o mês atual
   generateFixedExpensesTransactions() {
     const fixedExpenses = this.getFixedExpenses();
     if (fixedExpenses.length === 0) return;
@@ -244,32 +244,53 @@ const Storage = {
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-    const transactions = this.getTransactions();
+    let transactions = this.getTransactions();
 
     fixedExpenses.forEach(expense => {
-      // Verifica se o mês atual é >= mês de início
-      const startMonth = expense.startMonth || '2000-01';
-      if (currentMonth < startMonth) return;
+      const startMonth = expense.startMonth || currentMonth;
 
-      // Verifica se já existe transação dessa despesa fixa neste mês
-      const alreadyExists = transactions.some(t =>
-        t.fixedExpenseId === expense.id &&
-        t.date.startsWith(currentMonth)
-      );
+      // Gera transações para cada mês desde o início até o mês atual
+      const [startYear, startMon] = startMonth.split('-').map(Number);
+      let year = startYear;
+      let month = startMon;
 
-      if (!alreadyExists) {
-        // Cria a transação
-        const day = Math.min(expense.dueDay, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
-        const date = `${currentMonth}-${String(day).padStart(2, '0')}`;
+      while (true) {
+        const monthKey = `${year}-${String(month).padStart(2, '0')}`;
 
-        this.addTransaction({
-          type: 'expense',
-          value: expense.value,
-          description: `${expense.description} (Fixa)`,
-          category: expense.category,
-          date: date,
-          fixedExpenseId: expense.id
-        });
+        // Para se passou do mês atual
+        if (monthKey > currentMonth) break;
+
+        // Verifica se já existe transação dessa despesa fixa neste mês
+        const alreadyExists = transactions.some(t =>
+          t.fixedExpenseId === expense.id &&
+          t.date.startsWith(monthKey)
+        );
+
+        if (!alreadyExists) {
+          // Cria a transação
+          const lastDayOfMonth = new Date(year, month, 0).getDate();
+          const day = Math.min(expense.dueDay, lastDayOfMonth);
+          const date = `${monthKey}-${String(day).padStart(2, '0')}`;
+
+          const newTransaction = this.addTransaction({
+            type: 'expense',
+            value: expense.value,
+            description: `${expense.description} (Fixa)`,
+            category: expense.category,
+            date: date,
+            fixedExpenseId: expense.id
+          });
+
+          // Atualiza a lista de transações para verificação
+          transactions = this.getTransactions();
+        }
+
+        // Próximo mês
+        month++;
+        if (month > 12) {
+          month = 1;
+          year++;
+        }
       }
     });
   },
