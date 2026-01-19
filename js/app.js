@@ -282,6 +282,19 @@ const App = {
     );
   },
 
+  togglePaid(id) {
+    const transactions = Storage.getTransactions();
+    const transaction = transactions.find(t => t.id === id);
+
+    if (transaction) {
+      transaction.paid = !transaction.paid;
+      Storage.updateTransaction(id, { paid: transaction.paid });
+      UI.showToast(transaction.paid ? 'Marcado como pago!' : 'Marcado como pendente', 'success');
+      this.refreshAll();
+      Sync.autoSync();
+    }
+  },
+
   // ===== Relatórios =====
   updateReports(monthFilter = '') {
     let balance;

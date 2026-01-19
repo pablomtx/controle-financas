@@ -159,9 +159,19 @@ const UI = {
   // ===== Transações =====
   createTransactionItem(transaction, showActions = true) {
     const category = Storage.getCategoryById(transaction.category) || { name: 'Outros', color: '#607D8B', icon: '📦' };
+    const isPaid = transaction.paid || false;
+
+    const paidButton = transaction.type === 'expense' && showActions ? `
+      <button class="paid-btn ${isPaid ? 'paid' : ''}" onclick="App.togglePaid('${transaction.id}')" title="${isPaid ? 'Marcar como não pago' : 'Marcar como pago'}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          ${isPaid ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>' : '<circle cx="12" cy="12" r="10"></circle>'}
+        </svg>
+      </button>
+    ` : '';
 
     const actionsHtml = showActions ? `
       <div class="transaction-actions">
+        ${paidButton}
         <button onclick="App.editTransaction('${transaction.id}')" title="Editar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -178,13 +188,13 @@ const UI = {
     ` : '';
 
     return `
-      <li class="transaction-item">
+      <li class="transaction-item ${isPaid ? 'is-paid' : ''} ${transaction.type === 'expense' && !isPaid ? 'unpaid' : ''}">
         <div class="transaction-icon ${transaction.type}">
           ${category.icon || (transaction.type === 'income' ? '💰' : '💸')}
         </div>
         <div class="transaction-details">
           <span class="transaction-description">${transaction.description}</span>
-          <span class="transaction-meta">${category.name} • ${this.formatDate(transaction.date)}</span>
+          <span class="transaction-meta">${category.name} • ${this.formatDate(transaction.date)}${transaction.type === 'expense' ? (isPaid ? ' • ✓ Pago' : ' • Pendente') : ''}</span>
         </div>
         <span class="transaction-value ${transaction.type}">
           ${transaction.type === 'income' ? '+' : '-'} ${this.formatCurrency(transaction.value)}

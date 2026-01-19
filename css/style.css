@@ -1246,3 +1246,40 @@ body {
 .values-hidden #toggle-values .icon-eye-closed {
   display: block !important;
 }
+
+/* ===== Paid Status ===== */
+.transaction-item.is-paid {
+  opacity: 0.7;
+}
+
+.transaction-item.is-paid .transaction-description {
+  text-decoration: line-through;
+}
+
+.transaction-item.unpaid {
+  border-left: 3px solid var(--expense);
+}
+
+.paid-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paid-btn:hover {
+  background: var(--background);
+}
+
+.paid-btn.paid {
+  color: var(--income);
+}
+
+.paid-btn.paid svg {
+  fill: var(--income);
+}
