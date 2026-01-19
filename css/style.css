@@ -1225,14 +1225,24 @@ body {
   display: inline-block;
 }
 
+#toggle-values .icon-eye-open,
 #toggle-values .icon-eye-closed {
-  display: none;
+  width: 24px;
+  height: 24px;
+}
+
+#toggle-values .icon-eye-closed {
+  display: none !important;
+}
+
+#toggle-values .icon-eye-open {
+  display: block !important;
 }
 
 .values-hidden #toggle-values .icon-eye-open {
-  display: none;
+  display: none !important;
 }
 
 .values-hidden #toggle-values .icon-eye-closed {
-  display: block;
+  display: block !important;
 }
