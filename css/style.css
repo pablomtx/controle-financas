@@ -81,6 +81,11 @@ body {
   font-weight: 600;
 }
 
+.header-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
 .btn-icon {
   background: none;
   border: none;
@@ -1196,4 +1201,38 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
+}
+
+/* ===== Hide Values ===== */
+.values-hidden .balance-value,
+.values-hidden .summary-value,
+.values-hidden .transaction-value,
+.values-hidden .report-value,
+.values-hidden .goal-item-numbers .saved,
+.values-hidden .goal-item-numbers .target,
+.values-hidden .goal-item-numbers .remaining,
+.values-hidden .goal-item-footer .monthly,
+.values-hidden .fixed-expense-value,
+.values-hidden .category-amount,
+.values-hidden .current-savings strong,
+.values-hidden .savings-modal-info {
+  color: transparent !important;
+  text-shadow: none !important;
+  background: var(--border);
+  border-radius: 4px;
+  user-select: none;
+  min-width: 60px;
+  display: inline-block;
+}
+
+#toggle-values .icon-eye-closed {
+  display: none;
+}
+
+.values-hidden #toggle-values .icon-eye-open {
+  display: none;
+}
+
+.values-hidden #toggle-values .icon-eye-closed {
+  display: block;
 }

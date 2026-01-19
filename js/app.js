@@ -21,6 +21,7 @@ const App = {
     this.refreshAll();
     this.setDefaultDate();
     UI.initMoneyMasks();
+    UI.initValuesVisibility();
   },
 
   registerServiceWorker() {
@@ -54,6 +55,11 @@ const App = {
     document.getElementById('theme-toggle').addEventListener('click', () => {
       UI.toggleTheme();
       Charts.updateTheme();
+    });
+
+    // Toggle ocultar valores
+    document.getElementById('toggle-values').addEventListener('click', () => {
+      UI.toggleValuesVisibility();
     });
 
     // Formulário de transação

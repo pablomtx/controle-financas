@@ -555,5 +555,20 @@ const UI = {
     if (settings.theme) {
       document.documentElement.setAttribute('data-theme', settings.theme);
     }
+  },
+
+  // ===== Ocultar Valores =====
+  toggleValuesVisibility() {
+    const isHidden = document.body.classList.toggle('values-hidden');
+    const settings = Storage.getSettings();
+    settings.valuesHidden = isHidden;
+    Storage.saveSettings(settings);
+  },
+
+  initValuesVisibility() {
+    const settings = Storage.getSettings();
+    if (settings.valuesHidden) {
+      document.body.classList.add('values-hidden');
+    }
   }
 };
