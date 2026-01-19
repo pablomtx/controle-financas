@@ -182,6 +182,7 @@ const App = {
       UI.updateCategoriesList(Storage.getCategories());
       UI.updateFixedExpensesList(Storage.getFixedExpenses());
       UI.updateFixedExpenseCategorySelect(Storage.getCategories());
+      UI.resetFixedExpenseForm();
       this.updateSavingsDisplay();
       this.updateSyncStatus();
     }
@@ -481,8 +482,9 @@ const App = {
     const value = UI.parseMoneyValue(document.getElementById('fixed-expense-value').value);
     const category = document.getElementById('fixed-expense-category').value;
     const dueDay = parseInt(document.getElementById('fixed-expense-day').value);
+    const startMonth = document.getElementById('fixed-expense-start').value;
 
-    if (!description || !value || !category || !dueDay) {
+    if (!description || !value || !category || !dueDay || !startMonth) {
       UI.showToast('Preencha todos os campos', 'error');
       return;
     }
@@ -492,9 +494,9 @@ const App = {
       return;
     }
 
-    Storage.addFixedExpense({ description, value, category, dueDay });
+    Storage.addFixedExpense({ description, value, category, dueDay, startMonth });
 
-    // Gera a transação para o mês atual
+    // Gera a transação para o mês atual (se aplicável)
     Storage.generateFixedExpensesTransactions();
 
     UI.showToast('Despesa fixa adicionada!', 'success');

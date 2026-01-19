@@ -247,6 +247,10 @@ const Storage = {
     const transactions = this.getTransactions();
 
     fixedExpenses.forEach(expense => {
+      // Verifica se o mês atual é >= mês de início
+      const startMonth = expense.startMonth || '2000-01';
+      if (currentMonth < startMonth) return;
+
       // Verifica se já existe transação dessa despesa fixa neste mês
       const alreadyExists = transactions.some(t =>
         t.fixedExpenseId === expense.id &&

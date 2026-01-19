@@ -510,13 +510,14 @@ const UI = {
 
     list.innerHTML = expenses.map(expense => {
       const category = categories.find(c => c.id === expense.category) || { name: 'Outros', color: '#607D8B', icon: '📦' };
+      const startMonth = expense.startMonth ? this.formatMonthYear(expense.startMonth + '-01') : 'Sempre';
       return `
         <li class="fixed-expense-item">
           <div class="fixed-expense-info">
             <span class="fixed-expense-icon" style="background: ${category.color}">${category.icon || '📦'}</span>
             <div class="fixed-expense-details">
               <span class="fixed-expense-description">${expense.description}</span>
-              <span class="fixed-expense-meta">${category.name} • Dia ${expense.dueDay}</span>
+              <span class="fixed-expense-meta">${category.name} • Dia ${expense.dueDay} • Início: ${startMonth}</span>
             </div>
           </div>
           <div class="fixed-expense-actions">
@@ -546,6 +547,10 @@ const UI = {
   resetFixedExpenseForm() {
     document.getElementById('fixed-expense-form').reset();
     document.getElementById('fixed-expense-id').value = '';
+    // Define o mês atual como padrão
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById('fixed-expense-start').value = currentMonth;
   },
 
   // ===== Tema =====
