@@ -18,6 +18,9 @@ const App = {
       }
     }
 
+    // Gera transações das despesas fixas do mês
+    Storage.generateFixedExpensesTransactions();
+
     this.refreshAll();
     this.setDefaultDate();
     UI.initMoneyMasks();
@@ -463,9 +466,14 @@ const App = {
     }
 
     Storage.addFixedExpense({ description, value, category, dueDay });
+
+    // Gera a transação para o mês atual
+    Storage.generateFixedExpensesTransactions();
+
     UI.showToast('Despesa fixa adicionada!', 'success');
     UI.resetFixedExpenseForm();
     UI.updateFixedExpensesList(Storage.getFixedExpenses());
+    this.refreshAll();
     Sync.autoSync();
   },
 

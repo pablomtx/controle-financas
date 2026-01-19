@@ -236,6 +236,40 @@ const Storage = {
     return expenses.find(e => e.id === id);
   },
 
+  // Gera transações das despesas fixas para o mês atual
+  generateFixedExpensesTransactions() {
+    const fixedExpenses = this.getFixedExpenses();
+    if (fixedExpenses.length === 0) return;
+
+    const now = new Date();
+    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const transactions = this.getTransactions();
+
+    fixedExpenses.forEach(expense => {
+      // Verifica se já existe transação dessa despesa fixa neste mês
+      const alreadyExists = transactions.some(t =>
+        t.fixedExpenseId === expense.id &&
+        t.date.startsWith(currentMonth)
+      );
+
+      if (!alreadyExists) {
+        // Cria a transação
+        const day = Math.min(expense.dueDay, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
+        const date = `${currentMonth}-${String(day).padStart(2, '0')}`;
+
+        this.addTransaction({
+          type: 'expense',
+          value: expense.value,
+          description: `${expense.description} (Fixa)`,
+          category: expense.category,
+          date: date,
+          fixedExpenseId: expense.id
+        });
+      }
+    });
+  },
+
   // ===== Cálculos =====
   calculateBalance() {
     const transactions = this.getTransactions();
