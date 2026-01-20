@@ -96,7 +96,7 @@ const UI = {
 
   formatMonthYear(dateString) {
     const [year, month] = dateString.split('-');
-    const date = new Date(year, parseInt(month), 1);
+    const date = new Date(year, parseInt(month) - 1, 1);
     return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
   },
 
@@ -227,7 +227,7 @@ const UI = {
       const [year, month] = filter.split('-');
       filtered = transactions.filter(t => {
         const date = new Date(t.date);
-        return date.getFullYear() === parseInt(year) && date.getMonth() === parseInt(month);
+        return date.getFullYear() === parseInt(year) && date.getMonth() === parseInt(month) - 1;
       });
     }
 
@@ -253,7 +253,7 @@ const UI = {
 
     const options = months.map(m => {
       const [year, month] = m.split('-');
-      const date = new Date(year, parseInt(month), 1);
+      const date = new Date(year, parseInt(month) - 1, 1);
       const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
       return `<option value="${m}">${label}</option>`;
     }).join('');
@@ -597,5 +597,89 @@ const UI = {
     if (settings.valuesHidden) {
       document.body.classList.add('values-hidden');
     }
+  },
+
+  // ===== Modal de Replicação =====
+  showReplicateModal(transactions, currentMonthFilter) {
+    const modal = document.getElementById('replicate-modal');
+    const list = document.getElementById('replicate-list');
+
+    // Filtra transações do mês selecionado ou do mês atual
+    let filtered = transactions;
+    if (currentMonthFilter) {
+      const [year, month] = currentMonthFilter.split('-');
+      filtered = transactions.filter(t => {
+        const date = new Date(t.date);
+        return date.getFullYear() === parseInt(year) && date.getMonth() === parseInt(month) - 1;
+      });
+    } else {
+      // Pega o mês atual
+      const now = new Date();
+      filtered = transactions.filter(t => {
+        const date = new Date(t.date);
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+      });
+    }
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="replicate-empty">Nenhuma transação neste mês para replicar</div>';
+    } else {
+      // Ordena por tipo (receitas primeiro) e depois por data
+      filtered.sort((a, b) => {
+        if (a.type !== b.type) return a.type === 'income' ? -1 : 1;
+        return new Date(a.date) - new Date(b.date);
+      });
+
+      list.innerHTML = filtered.map(t => {
+        const category = Storage.getCategoryById(t.category) || { name: 'Outros', icon: '📦' };
+        return `
+          <div class="replicate-item" data-id="${t.id}">
+            <input type="checkbox" class="replicate-checkbox" data-id="${t.id}">
+            <div class="replicate-info">
+              <span class="replicate-description">${t.description}</span>
+              <span class="replicate-meta">${category.icon || ''} ${category.name} • ${this.formatDate(t.date)}</span>
+            </div>
+            <span class="replicate-value ${t.type}">
+              ${t.type === 'income' ? '+' : '-'} ${this.formatCurrency(t.value)}
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      // Adiciona evento de clique nos itens
+      list.querySelectorAll('.replicate-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (e.target.type !== 'checkbox') {
+            const checkbox = item.querySelector('.replicate-checkbox');
+            checkbox.checked = !checkbox.checked;
+            item.classList.toggle('selected', checkbox.checked);
+          }
+        });
+
+        item.querySelector('.replicate-checkbox').addEventListener('change', (e) => {
+          item.classList.toggle('selected', e.target.checked);
+        });
+      });
+    }
+
+    modal.classList.add('active');
+  },
+
+  hideReplicateModal() {
+    document.getElementById('replicate-modal').classList.remove('active');
+  },
+
+  getSelectedReplicateIds() {
+    const checkboxes = document.querySelectorAll('.replicate-checkbox:checked');
+    return Array.from(checkboxes).map(cb => cb.dataset.id);
+  },
+
+  selectAllReplicate(select) {
+    const items = document.querySelectorAll('.replicate-item');
+    items.forEach(item => {
+      const checkbox = item.querySelector('.replicate-checkbox');
+      checkbox.checked = select;
+      item.classList.toggle('selected', select);
+    });
   }
 };

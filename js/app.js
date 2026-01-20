@@ -167,6 +167,27 @@ const App = {
     document.getElementById('savings-modal-cancel').addEventListener('click', () => {
       this.closeSavingsModal();
     });
+
+    // Replicar transações
+    document.getElementById('replicate-btn').addEventListener('click', () => {
+      this.showReplicateModal();
+    });
+
+    document.getElementById('replicate-confirm').addEventListener('click', () => {
+      this.confirmReplicate();
+    });
+
+    document.getElementById('replicate-cancel').addEventListener('click', () => {
+      UI.hideReplicateModal();
+    });
+
+    document.getElementById('select-all-btn').addEventListener('click', () => {
+      UI.selectAllReplicate(true);
+    });
+
+    document.getElementById('select-none-btn').addEventListener('click', () => {
+      UI.selectAllReplicate(false);
+    });
   },
 
   onScreenChange(screen) {
@@ -437,6 +458,37 @@ const App = {
 
   closeSavingsModal() {
     document.getElementById('savings-modal').classList.remove('active');
+  },
+
+  // ===== Replicar Transações =====
+  showReplicateModal() {
+    const transactions = Storage.getTransactions();
+    const currentFilter = document.getElementById('filter-month').value;
+    UI.showReplicateModal(transactions, currentFilter);
+  },
+
+  confirmReplicate() {
+    const selectedIds = UI.getSelectedReplicateIds();
+
+    if (selectedIds.length === 0) {
+      UI.showToast('Selecione pelo menos uma transação', 'error');
+      return;
+    }
+
+    // Determina o mês de origem baseado no filtro
+    const currentFilter = document.getElementById('filter-month').value;
+    const targetMonth = Storage.getNextMonth(currentFilter || Storage.getCurrentMonth());
+
+    // Replica as transações
+    const replicated = Storage.replicateTransactions(selectedIds, targetMonth);
+
+    UI.hideReplicateModal();
+
+    const monthName = new Date(targetMonth + '-01').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    UI.showToast(`${replicated.length} transação(ões) replicada(s) para ${monthName}!`, 'success');
+
+    this.refreshAll();
+    Sync.autoSync();
   },
 
   // ===== Categorias =====

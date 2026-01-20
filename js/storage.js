@@ -391,6 +391,66 @@ const Storage = {
     return Array.from(months).sort().reverse();
   },
 
+  // ===== Replicar Transações =====
+  replicateTransactions(transactionIds, targetMonth) {
+    const transactions = this.getTransactions();
+    const replicated = [];
+
+    transactionIds.forEach(id => {
+      const original = transactions.find(t => t.id === id);
+      if (original) {
+        // Calcula a nova data mantendo o dia
+        const originalDate = new Date(original.date);
+        const [year, month] = targetMonth.split('-').map(Number);
+        const day = originalDate.getDate();
+
+        // Ajusta o dia se for maior que o último dia do mês alvo
+        const lastDayOfMonth = new Date(year, month, 0).getDate();
+        const adjustedDay = Math.min(day, lastDayOfMonth);
+
+        const newDate = `${targetMonth}-${String(adjustedDay).padStart(2, '0')}`;
+
+        const newTransaction = this.addTransaction({
+          type: original.type,
+          value: original.value,
+          description: original.description,
+          category: original.category,
+          date: newDate,
+          paid: false
+        });
+
+        replicated.push(newTransaction);
+      }
+    });
+
+    return replicated;
+  },
+
+  getNextMonth(currentMonth = null) {
+    let year, month;
+
+    if (currentMonth) {
+      [year, month] = currentMonth.split('-').map(Number);
+    } else {
+      const now = new Date();
+      year = now.getFullYear();
+      month = now.getMonth() + 1;
+    }
+
+    month++;
+    if (month > 12) {
+      month = 1;
+      year++;
+    }
+
+    return `${year}-${String(month).padStart(2, '0')}`;
+  },
+
+  getCurrentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  },
+
   // ===== Utilitários =====
   generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);

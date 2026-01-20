@@ -1146,6 +1146,119 @@ body {
   gap: 0.5rem;
 }
 
+.modal-large {
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* ===== Replicate Button ===== */
+.btn-replicate {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+}
+
+.btn-replicate svg {
+  flex-shrink: 0;
+}
+
+/* ===== Replicate Modal ===== */
+.replicate-actions-top {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.replicate-actions-top .btn {
+  flex: 1;
+}
+
+.replicate-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.replicate-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.replicate-item:last-child {
+  border-bottom: none;
+}
+
+.replicate-item:hover {
+  background: var(--background);
+}
+
+.replicate-item.selected {
+  background: var(--income-light);
+}
+
+.replicate-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.75rem;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.replicate-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.replicate-description {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.replicate-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.replicate-value {
+  font-weight: 600;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.replicate-value.income {
+  color: var(--income);
+}
+
+.replicate-value.expense {
+  color: var(--expense);
+}
+
+.replicate-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
 /* ===== Toast ===== */
 .toast {
   position: fixed;

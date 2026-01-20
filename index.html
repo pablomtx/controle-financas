@@ -140,6 +140,13 @@
               </select>
             </div>
           </div>
+          <button id="replicate-btn" class="btn btn-secondary btn-replicate">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Replicar para Próximo Mês
+          </button>
           <ul id="transactions-list" class="transaction-list"></ul>
           <p id="no-filtered-transactions" class="empty-message" style="display: none;">Nenhuma transação encontrada</p>
         </div>
@@ -409,6 +416,23 @@
         <div class="modal-actions">
           <button id="savings-modal-cancel" class="btn btn-secondary">Cancelar</button>
           <button id="savings-modal-confirm" class="btn btn-primary">Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Replicar Transações -->
+    <div id="replicate-modal" class="modal">
+      <div class="modal-content modal-large">
+        <h3>Replicar para Próximo Mês</h3>
+        <p class="modal-subtitle">Selecione as transações que deseja copiar para o próximo mês:</p>
+        <div class="replicate-actions-top">
+          <button type="button" id="select-all-btn" class="btn btn-small btn-secondary">Selecionar Todas</button>
+          <button type="button" id="select-none-btn" class="btn btn-small btn-secondary">Limpar Seleção</button>
+        </div>
+        <div id="replicate-list" class="replicate-list"></div>
+        <div class="modal-actions">
+          <button id="replicate-cancel" class="btn btn-secondary">Cancelar</button>
+          <button id="replicate-confirm" class="btn btn-primary">Replicar Selecionadas</button>
         </div>
       </div>
     </div>
