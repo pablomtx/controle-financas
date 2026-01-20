@@ -121,10 +121,13 @@ const App = {
       this.saveFixedExpense();
     });
 
-    // Formulário de saldo guardado
-    document.getElementById('savings-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.saveSavings();
+    // Botões de saldo guardado
+    document.getElementById('savings-deposit-btn').addEventListener('click', () => {
+      this.depositSavings();
+    });
+
+    document.getElementById('savings-withdraw-btn').addEventListener('click', () => {
+      this.withdrawSavings();
     });
 
     // Exportar dados
@@ -572,20 +575,60 @@ const App = {
   },
 
   // ===== Saldo Guardado =====
-  saveSavings() {
+  depositSavings() {
     const value = UI.parseMoneyValue(document.getElementById('savings-value').value);
-    Storage.setSavings(value);
-    UI.showToast('Saldo guardado atualizado!', 'success');
+    const reason = document.getElementById('savings-reason').value.trim() || 'Depósito';
+
+    if (!value || value <= 0) {
+      UI.showToast('Informe um valor válido', 'error');
+      return;
+    }
+
+    Storage.addToSavings(value, reason);
+    UI.showToast(`Depósito de ${UI.formatCurrency(value)} realizado!`, 'success');
+    this.clearSavingsForm();
     this.updateSavingsDisplay();
     this.refreshAll();
     Sync.autoSync();
   },
 
+  withdrawSavings() {
+    const value = UI.parseMoneyValue(document.getElementById('savings-value').value);
+    const reason = document.getElementById('savings-reason').value.trim();
+
+    if (!value || value <= 0) {
+      UI.showToast('Informe um valor válido', 'error');
+      return;
+    }
+
+    if (!reason) {
+      UI.showToast('Informe o motivo da retirada', 'error');
+      return;
+    }
+
+    const result = Storage.withdrawFromSavings(value, reason);
+    if (result === null) {
+      UI.showToast('Saldo insuficiente para retirada', 'error');
+      return;
+    }
+
+    UI.showToast(`Retirada de ${UI.formatCurrency(value)} realizada!`, 'success');
+    this.clearSavingsForm();
+    this.updateSavingsDisplay();
+    this.refreshAll();
+    Sync.autoSync();
+  },
+
+  clearSavingsForm() {
+    document.getElementById('savings-value').value = '';
+    document.getElementById('savings-reason').value = '';
+  },
+
   updateSavingsDisplay() {
     const savings = Storage.getSavings();
-    document.getElementById('savings-value').value = savings > 0 ? savings : '';
     document.getElementById('current-savings-display').innerHTML =
       `Saldo guardado atual: <strong>${UI.formatCurrency(savings)}</strong>`;
+    UI.updateSavingsHistory(Storage.getSavingsHistory());
   },
 
   // ===== Dados =====

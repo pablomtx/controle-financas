@@ -237,16 +237,40 @@
       <section id="screen-settings" class="screen">
         <div class="settings-section">
           <h3>Saldo Guardado</h3>
-          <p class="settings-description">Informe quanto você já tem guardado (poupança, investimentos, etc.)</p>
+          <p class="settings-description">Gerencie seu saldo guardado (poupança, investimentos, etc.)</p>
+          <p id="current-savings-display" class="current-savings">Saldo guardado atual: <strong>R$ 0,00</strong></p>
           <form id="savings-form" class="savings-form">
             <div class="form-row">
               <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                <input type="number" id="savings-value" step="0.01" min="0" placeholder="0,00">
+                <input type="number" id="savings-value" step="0.01" min="0.01" placeholder="Valor (R$)" required>
               </div>
-              <button type="submit" class="btn btn-primary btn-small">Salvar</button>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="savings-reason" placeholder="Motivo (opcional para depósito)" maxlength="50">
+              </div>
+            </div>
+            <div class="form-row savings-buttons">
+              <button type="button" id="savings-deposit-btn" class="btn btn-income btn-small">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Depositar
+              </button>
+              <button type="button" id="savings-withdraw-btn" class="btn btn-expense btn-small">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Retirar
+              </button>
             </div>
           </form>
-          <p id="current-savings-display" class="current-savings">Saldo guardado atual: <strong>R$ 0,00</strong></p>
+          <div class="savings-history-section">
+            <h4>Histórico de Movimentações</h4>
+            <ul id="savings-history-list" class="savings-history-list"></ul>
+            <p id="no-savings-history" class="empty-message" style="display: none;">Nenhuma movimentação registrada</p>
+          </div>
         </div>
 
         <div class="settings-section">

@@ -114,6 +114,7 @@ const Sync = {
       categories: Storage.getCategories(),
       goals: Storage.getGoals(),
       savings: Storage.getSavings(),
+      savingsHistory: Storage.getSavingsHistory(),
       settings: Storage.getSettings(),
       fixedExpenses: Storage.getFixedExpenses(),
       syncedAt: new Date().toISOString()
@@ -193,6 +194,7 @@ const Sync = {
       if (data.categories) Storage.saveCategories(data.categories);
       if (data.goals) Storage.saveGoals(data.goals);
       if (data.savings !== undefined) Storage.setSavings(data.savings);
+      if (data.savingsHistory) Storage.saveSavingsHistory(data.savingsHistory);
       if (data.settings) Storage.saveSettings(data.settings);
       if (data.fixedExpenses) Storage.saveFixedExpenses(data.fixedExpenses);
 

@@ -562,6 +562,128 @@ body {
   flex: none;
 }
 
+.btn-income {
+  background: var(--income);
+  color: white;
+}
+
+.btn-income:hover {
+  opacity: 0.9;
+}
+
+.btn-expense {
+  background: var(--expense);
+  color: white;
+}
+
+.btn-expense:hover {
+  opacity: 0.9;
+}
+
+/* ===== Savings Form ===== */
+.savings-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.savings-buttons .btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* ===== Savings History ===== */
+.savings-history-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.savings-history-section h4 {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.savings-history-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.savings-history-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  background: var(--background);
+  gap: 0.75rem;
+}
+
+.savings-history-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.savings-history-icon.deposit {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--income);
+}
+
+.savings-history-icon.withdraw {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--expense);
+}
+
+.savings-history-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.savings-history-reason {
+  display: block;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.savings-history-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.savings-history-values {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.savings-history-value {
+  display: block;
+  font-weight: 600;
+}
+
+.savings-history-value.deposit {
+  color: var(--income);
+}
+
+.savings-history-value.withdraw {
+  color: var(--expense);
+}
+
+.savings-history-balance {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
 /* ===== Filter Group ===== */
 .list-header {
   display: flex;

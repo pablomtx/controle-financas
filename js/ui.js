@@ -599,6 +599,54 @@ const UI = {
     }
   },
 
+  // ===== Histórico de Saldo Guardado =====
+  updateSavingsHistory(history) {
+    const list = document.getElementById('savings-history-list');
+    const emptyMsg = document.getElementById('no-savings-history');
+
+    if (!history || history.length === 0) {
+      list.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+
+    emptyMsg.style.display = 'none';
+
+    // Ordena por data (mais recentes primeiro)
+    const sorted = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    list.innerHTML = sorted.map(item => {
+      const date = new Date(item.date);
+      const formattedDate = date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const isDeposit = item.type === 'deposit';
+      const icon = isDeposit ? '↑' : '↓';
+      const typeClass = isDeposit ? 'deposit' : 'withdraw';
+      const typeLabel = isDeposit ? 'Depósito' : 'Retirada';
+
+      return `
+        <li class="savings-history-item ${typeClass}">
+          <div class="savings-history-icon ${typeClass}">${icon}</div>
+          <div class="savings-history-details">
+            <span class="savings-history-reason">${item.reason}</span>
+            <span class="savings-history-meta">${typeLabel} • ${formattedDate}</span>
+          </div>
+          <div class="savings-history-values">
+            <span class="savings-history-value ${typeClass}">
+              ${isDeposit ? '+' : '-'} ${this.formatCurrency(item.value)}
+            </span>
+            <span class="savings-history-balance">Saldo: ${this.formatCurrency(item.balanceAfter)}</span>
+          </div>
+        </li>
+      `;
+    }).join('');
+  },
+
   // ===== Modal de Replicação =====
   showReplicateModal(transactions, currentMonthFilter) {
     const modal = document.getElementById('replicate-modal');

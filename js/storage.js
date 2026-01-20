@@ -8,6 +8,7 @@ const Storage = {
     GOALS: 'financas_goals',
     SETTINGS: 'financas_settings',
     SAVINGS: 'financas_savings',
+    SAVINGS_HISTORY: 'financas_savings_history',
     FIXED_EXPENSES: 'financas_fixed_expenses'
   },
 
@@ -192,6 +193,66 @@ const Storage = {
   setSavings(value) {
     localStorage.setItem(this.KEYS.SAVINGS, JSON.stringify(value));
     return value;
+  },
+
+  // ===== Histórico de Saldo Guardado =====
+  getSavingsHistory() {
+    const data = localStorage.getItem(this.KEYS.SAVINGS_HISTORY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  saveSavingsHistory(history) {
+    localStorage.setItem(this.KEYS.SAVINGS_HISTORY, JSON.stringify(history));
+  },
+
+  addToSavings(value, reason = 'Depósito') {
+    const currentSavings = this.getSavings();
+    const newSavings = currentSavings + value;
+    this.setSavings(newSavings);
+
+    // Adiciona ao histórico
+    const history = this.getSavingsHistory();
+    history.push({
+      id: this.generateId(),
+      type: 'deposit',
+      value: value,
+      reason: reason,
+      balanceAfter: newSavings,
+      date: new Date().toISOString()
+    });
+    this.saveSavingsHistory(history);
+
+    return newSavings;
+  },
+
+  withdrawFromSavings(value, reason) {
+    const currentSavings = this.getSavings();
+    if (value > currentSavings) {
+      return null; // Saldo insuficiente
+    }
+
+    const newSavings = currentSavings - value;
+    this.setSavings(newSavings);
+
+    // Adiciona ao histórico
+    const history = this.getSavingsHistory();
+    history.push({
+      id: this.generateId(),
+      type: 'withdraw',
+      value: value,
+      reason: reason,
+      balanceAfter: newSavings,
+      date: new Date().toISOString()
+    });
+    this.saveSavingsHistory(history);
+
+    return newSavings;
+  },
+
+  deleteSavingsHistoryItem(id) {
+    const history = this.getSavingsHistory();
+    const filtered = history.filter(h => h.id !== id);
+    this.saveSavingsHistory(filtered);
   },
 
   // ===== Despesas Fixas =====
@@ -464,6 +525,7 @@ const Storage = {
       goals: this.getGoals(),
       settings: this.getSettings(),
       savings: this.getSavings(),
+      savingsHistory: this.getSavingsHistory(),
       fixedExpenses: this.getFixedExpenses(),
       exportedAt: new Date().toISOString()
     };
@@ -485,6 +547,9 @@ const Storage = {
     if (data.savings !== undefined) {
       this.setSavings(data.savings);
     }
+    if (data.savingsHistory) {
+      this.saveSavingsHistory(data.savingsHistory);
+    }
     if (data.fixedExpenses) {
       this.saveFixedExpenses(data.fixedExpenses);
     }
@@ -496,6 +561,7 @@ const Storage = {
     localStorage.removeItem(this.KEYS.GOALS);
     localStorage.removeItem(this.KEYS.SETTINGS);
     localStorage.removeItem(this.KEYS.SAVINGS);
+    localStorage.removeItem(this.KEYS.SAVINGS_HISTORY);
     localStorage.removeItem(this.KEYS.FIXED_EXPENSES);
   }
 };
