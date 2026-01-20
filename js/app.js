@@ -636,6 +636,7 @@ const App = {
     const transactions = Storage.getTransactions();
     const categories = Storage.getCategories();
     const savings = Storage.getSavings();
+    const savingsHistory = Storage.getSavingsHistory();
     const balance = Storage.calculateBalance();
 
     // Prepara dados das transações para Excel
@@ -653,6 +654,26 @@ const App = {
     // Ordena por data
     transactionsData.sort((a, b) => new Date(a['Data']) - new Date(b['Data']));
 
+    // Prepara dados do histórico de saldo guardado
+    const savingsHistoryData = savingsHistory.map(h => {
+      const date = new Date(h.date);
+      return {
+        'Data': date.toLocaleDateString('pt-BR'),
+        'Hora': date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        'Tipo': h.type === 'deposit' ? 'Depósito' : 'Retirada',
+        'Motivo': h.reason,
+        'Valor': parseFloat(h.value),
+        'Saldo Após': parseFloat(h.balanceAfter)
+      };
+    });
+
+    // Ordena por data (mais antigas primeiro)
+    savingsHistoryData.sort((a, b) => {
+      const dateA = a['Data'].split('/').reverse().join('-');
+      const dateB = b['Data'].split('/').reverse().join('-');
+      return new Date(dateA) - new Date(dateB);
+    });
+
     // Resumo
     const resumoData = [
       { 'Item': 'Saldo Guardado', 'Valor': savings },
@@ -667,6 +688,12 @@ const App = {
     // Aba de Transações
     const wsTransacoes = XLSX.utils.json_to_sheet(transactionsData);
     XLSX.utils.book_append_sheet(wb, wsTransacoes, 'Transações');
+
+    // Aba de Histórico do Saldo Guardado
+    if (savingsHistoryData.length > 0) {
+      const wsSavingsHistory = XLSX.utils.json_to_sheet(savingsHistoryData);
+      XLSX.utils.book_append_sheet(wb, wsSavingsHistory, 'Histórico Saldo');
+    }
 
     // Aba de Resumo
     const wsResumo = XLSX.utils.json_to_sheet(resumoData);
