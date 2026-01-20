@@ -168,16 +168,18 @@ body {
 /* ===== Summary Cards ===== */
 .summary-cards {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
 .summary-card {
   background: var(--surface);
-  padding: 0.75rem;
+  padding: 0.75rem 0.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px var(--shadow);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .summary-card.savings {
@@ -196,17 +198,33 @@ body {
   border-left: 4px solid var(--expense);
 }
 
+.summary-card.remaining {
+  border-left: 4px solid #FF9800;
+}
+
+.summary-card.remaining .summary-value {
+  color: #FF9800;
+}
+
+.summary-card.remaining .summary-value.negative {
+  color: var(--expense);
+}
+
 .summary-label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   margin-bottom: 0.25rem;
+  white-space: nowrap;
 }
 
 .summary-value {
   display: block;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .summary-card.income .summary-value {
@@ -1206,6 +1224,7 @@ body {
 /* ===== Hide Values ===== */
 .values-hidden .balance-value,
 .values-hidden .summary-value,
+.values-hidden #total-remaining,
 .values-hidden .transaction-value,
 .values-hidden .report-value,
 .values-hidden .goal-item-numbers .saved,

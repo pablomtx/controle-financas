@@ -107,6 +107,18 @@ const UI = {
     document.getElementById('total-income').textContent = this.formatCurrency(balance.income);
     document.getElementById('total-expense').textContent = this.formatCurrency(balance.expense);
 
+    // Calcula e mostra "Vai Sobrar" (receitas - despesas)
+    const remaining = balance.income - balance.expense;
+    const remainingEl = document.getElementById('total-remaining');
+    remainingEl.textContent = this.formatCurrency(remaining);
+
+    // Atualiza cor do "Vai Sobrar"
+    if (remaining < 0) {
+      remainingEl.classList.add('negative');
+    } else {
+      remainingEl.classList.remove('negative');
+    }
+
     // Atualiza cor do saldo
     const balanceEl = document.getElementById('current-balance');
     if (balance.balance < 0) {
