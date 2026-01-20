@@ -1,4 +1,4 @@
-const CACHE_NAME = 'financas-v19';
+const CACHE_NAME = 'financas-v20';
 const urlsToCache = [
   './',
   './index.html',
@@ -8,11 +8,11 @@ const urlsToCache = [
   './js/sync.js',
   './js/charts.js',
   './js/ui.js',
+  './lib/chart.min.js',
+  './lib/xlsx.full.min.js',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js'
+  './icons/icon-512.png'
 ];
 
 // Instalação do Service Worker
