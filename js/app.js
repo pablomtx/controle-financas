@@ -3,11 +3,13 @@
 
 const App = {
   currentTransactionType: 'income',
+  currentDashboardMonth: null, // Formato: 'YYYY-MM'
 
   // ===== Inicialização =====
   async init() {
     this.registerServiceWorker();
     this.initTheme();
+    this.initDashboardMonth();
     this.bindEvents();
 
     // Sincroniza ao carregar (busca dados da nuvem)
@@ -25,6 +27,48 @@ const App = {
     this.setDefaultDate();
     UI.initMoneyMasks();
     UI.initValuesVisibility();
+  },
+
+  initDashboardMonth() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    this.currentDashboardMonth = `${year}-${month}`;
+    this.updateDashboardMonthLabel();
+  },
+
+  changeDashboardMonth(direction) {
+    const [year, month] = this.currentDashboardMonth.split('-').map(Number);
+    let newMonth = month + direction;
+    let newYear = year;
+
+    if (newMonth < 1) {
+      newMonth = 12;
+      newYear--;
+    } else if (newMonth > 12) {
+      newMonth = 1;
+      newYear++;
+    }
+
+    this.currentDashboardMonth = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+    this.updateDashboardMonthLabel();
+    this.refreshAll();
+  },
+
+  updateDashboardMonthLabel() {
+    const [year, month] = this.currentDashboardMonth.split('-').map(Number);
+    const date = new Date(year, month - 1, 1);
+    const label = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    document.getElementById('dashboard-month-label').textContent = label;
+  },
+
+  updateRecentTransactionsForMonth(transactions) {
+    const [year, month] = this.currentDashboardMonth.split('-').map(Number);
+    const filtered = transactions.filter(t => {
+      const date = new Date(t.date);
+      return date.getFullYear() === year && date.getMonth() === month - 1;
+    });
+    UI.updateRecentTransactions(filtered);
   },
 
   registerServiceWorker() {
@@ -52,6 +96,15 @@ const App = {
         UI.switchScreen(btn.dataset.screen);
         this.onScreenChange(btn.dataset.screen);
       });
+    });
+
+    // Navegação de mês no dashboard
+    document.getElementById('prev-month-btn').addEventListener('click', () => {
+      this.changeDashboardMonth(-1);
+    });
+
+    document.getElementById('next-month-btn').addEventListener('click', () => {
+      this.changeDashboardMonth(1);
     });
 
     // Toggle tema
@@ -214,7 +267,7 @@ const App = {
 
   // ===== Refresh All Data =====
   refreshAll() {
-    const balance = Storage.calculateBalance();
+    const balance = Storage.calculateBalance(this.currentDashboardMonth);
     const transactions = Storage.getTransactions();
     const goals = Storage.getGoals();
     const categories = Storage.getCategories();
@@ -222,7 +275,7 @@ const App = {
 
     // Dashboard
     UI.updateBalance(balance);
-    UI.updateRecentTransactions(transactions);
+    this.updateRecentTransactionsForMonth(transactions);
 
     // Transações
     UI.updateTransactionsList(transactions);

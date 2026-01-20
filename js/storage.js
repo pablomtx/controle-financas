@@ -357,17 +357,34 @@ const Storage = {
   },
 
   // ===== Cálculos =====
-  calculateBalance() {
+  calculateBalance(monthFilter = null) {
     const transactions = this.getTransactions();
     const savings = this.getSavings();
     let income = 0;
     let expense = 0;
 
+    // Se não passar filtro, usa o mês atual
+    let filterYear, filterMonth;
+    if (monthFilter) {
+      [filterYear, filterMonth] = monthFilter.split('-').map(Number);
+    } else {
+      const now = new Date();
+      filterYear = now.getFullYear();
+      filterMonth = now.getMonth() + 1;
+    }
+
     transactions.forEach(t => {
-      if (t.type === 'income') {
-        income += parseFloat(t.value);
-      } else {
-        expense += parseFloat(t.value);
+      const date = new Date(t.date);
+      const transYear = date.getFullYear();
+      const transMonth = date.getMonth() + 1;
+
+      // Filtra pelo mês
+      if (transYear === filterYear && transMonth === filterMonth) {
+        if (t.type === 'income') {
+          income += parseFloat(t.value);
+        } else {
+          expense += parseFloat(t.value);
+        }
       }
     });
 
