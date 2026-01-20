@@ -29,7 +29,7 @@ const App = {
 
   registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then(reg => console.log('Service Worker registrado'))
         .catch(err => console.log('Erro ao registrar SW:', err));
     }
