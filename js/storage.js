@@ -416,6 +416,37 @@ const Storage = {
     };
   },
 
+  // Busca despesas não pagas que vencem nos próximos X dias
+  getUpcomingDueExpenses(daysAhead = 3) {
+    const transactions = this.getTransactions();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const futureDate = new Date(today);
+    futureDate.setDate(futureDate.getDate() + daysAhead);
+
+    return transactions.filter(t => {
+      // Só despesas não pagas
+      if (t.type !== 'expense' || t.paid) return false;
+
+      const dueDate = new Date(t.date + 'T00:00:00');
+
+      // Vence entre hoje e os próximos X dias (inclusive atrasadas)
+      return dueDate <= futureDate;
+    }).map(t => {
+      const dueDate = new Date(t.date + 'T00:00:00');
+      const diffTime = dueDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return {
+        ...t,
+        daysUntilDue: diffDays,
+        isOverdue: diffDays < 0,
+        isDueToday: diffDays === 0
+      };
+    }).sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+  },
+
   getExpensesByCategory(year = null, month = null) {
     let transactions = this.getTransactions();
 

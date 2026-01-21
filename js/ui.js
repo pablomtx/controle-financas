@@ -128,6 +128,80 @@ const UI = {
     }
   },
 
+  updateDueExpensesAlert(expenses) {
+    const alert = document.getElementById('due-expenses-alert');
+    const list = document.getElementById('due-expenses-list');
+    const title = document.getElementById('due-alert-title');
+
+    if (!expenses || expenses.length === 0) {
+      alert.style.display = 'none';
+      return;
+    }
+
+    alert.style.display = 'block';
+
+    // Conta atrasadas, hoje e próximas
+    const overdue = expenses.filter(e => e.isOverdue).length;
+    const dueToday = expenses.filter(e => e.isDueToday).length;
+    const upcoming = expenses.filter(e => !e.isOverdue && !e.isDueToday).length;
+
+    // Define o título
+    let titleText = '';
+    if (overdue > 0) {
+      titleText = `${overdue} atrasada${overdue > 1 ? 's' : ''}`;
+      if (dueToday > 0 || upcoming > 0) titleText += ', ';
+    }
+    if (dueToday > 0) {
+      titleText += `${dueToday} vence${dueToday > 1 ? 'm' : ''} hoje`;
+      if (upcoming > 0) titleText += ', ';
+    }
+    if (upcoming > 0) {
+      titleText += `${upcoming} próxima${upcoming > 1 ? 's' : ''}`;
+    }
+    title.textContent = titleText;
+
+    // Define classe do alerta (vermelho se atrasada, amarelo se só próximas)
+    alert.classList.remove('has-overdue', 'has-today');
+    if (overdue > 0) {
+      alert.classList.add('has-overdue');
+    } else if (dueToday > 0) {
+      alert.classList.add('has-today');
+    }
+
+    // Renderiza a lista
+    list.innerHTML = expenses.slice(0, 5).map(expense => {
+      const category = Storage.getCategoryById(expense.category) || { name: 'Outros', icon: '📦' };
+
+      let statusText = '';
+      let statusClass = '';
+      if (expense.isOverdue) {
+        statusText = `Atrasada ${Math.abs(expense.daysUntilDue)} dia${Math.abs(expense.daysUntilDue) > 1 ? 's' : ''}`;
+        statusClass = 'overdue';
+      } else if (expense.isDueToday) {
+        statusText = 'Vence hoje!';
+        statusClass = 'today';
+      } else {
+        statusText = `Vence em ${expense.daysUntilDue} dia${expense.daysUntilDue > 1 ? 's' : ''}`;
+        statusClass = 'upcoming';
+      }
+
+      return `
+        <li class="due-expense-item ${statusClass}">
+          <div class="due-expense-info">
+            <span class="due-expense-desc">${expense.description}</span>
+            <span class="due-expense-status">${statusText}</span>
+          </div>
+          <div class="due-expense-value">${this.formatCurrency(expense.value)}</div>
+          <button class="due-expense-pay" onclick="App.togglePaid('${expense.id}')" title="Marcar como pago">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </li>
+      `;
+    }).join('');
+  },
+
   updateRecentTransactions(transactions) {
     const list = document.getElementById('recent-list');
     const emptyMsg = document.getElementById('no-transactions-msg');

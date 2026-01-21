@@ -277,6 +277,10 @@ const App = {
     UI.updateBalance(balance);
     this.updateRecentTransactionsForMonth(transactions);
 
+    // Alerta de despesas próximas do vencimento (3 dias)
+    const upcomingDue = Storage.getUpcomingDueExpenses(3);
+    UI.updateDueExpensesAlert(upcomingDue);
+
     // Transações
     UI.updateTransactionsList(transactions);
     UI.updateMonthFilters(months);
