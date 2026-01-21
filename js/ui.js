@@ -352,11 +352,12 @@ const UI = {
     list.innerHTML = goals.map(goal => {
       const percent = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
       const isCompleted = percent >= 100;
-      const monthlyAmount = goal.targetAmount / goal.months;
       const endDate = new Date(goal.createdAt);
       endDate.setMonth(endDate.getMonth() + goal.months);
-      const remainingMonths = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24 * 30)));
-      const remaining = goal.targetAmount - goal.currentAmount;
+      const remainingMonths = Math.max(1, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24 * 30)));
+      const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+      // Calcula quanto guardar por mês baseado no que falta dividido pelos meses restantes
+      const monthlyAmount = remaining > 0 ? remaining / remainingMonths : 0;
 
       return `
         <li class="goal-item ${isCompleted ? 'completed' : ''}">
