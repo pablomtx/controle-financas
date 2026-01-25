@@ -523,13 +523,13 @@ const Storage = {
         }
 
         // Calcula a nova data mantendo o dia
-        const originalDate = new Date(original.date);
+        // Extrai o dia diretamente da string para evitar problemas de fuso horário
+        const [origYear, origMonth, origDay] = original.date.split('-').map(Number);
         const [year, month] = targetMonth.split('-').map(Number);
-        const day = originalDate.getDate();
 
         // Ajusta o dia se for maior que o último dia do mês alvo
         const lastDayOfMonth = new Date(year, month, 0).getDate();
-        const adjustedDay = Math.min(day, lastDayOfMonth);
+        const adjustedDay = Math.min(origDay, lastDayOfMonth);
 
         const newDate = `${targetMonth}-${String(adjustedDay).padStart(2, '0')}`;
 
