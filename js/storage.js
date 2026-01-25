@@ -493,7 +493,7 @@ const Storage = {
 
     transactions.forEach(t => {
       const date = new Date(t.date);
-      const key = `${date.getFullYear()}-${String(date.getMonth()).padStart(2, '0')}`;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
       months.add(key);
     });
 
@@ -502,12 +502,26 @@ const Storage = {
 
   // ===== Replicar Transações =====
   replicateTransactions(transactionIds, targetMonth) {
-    const transactions = this.getTransactions();
+    let transactions = this.getTransactions();
     const replicated = [];
 
     transactionIds.forEach(id => {
       const original = transactions.find(t => t.id === id);
       if (original) {
+        // Se for despesa de cartão com parcelas, verifica se é a última
+        if (original.isCard && original.installments && original.installments <= 1) {
+          // Última parcela - não replica
+          return;
+        }
+
+        // Verifica se já foi replicada para o mês alvo
+        const alreadyReplicated = transactions.some(t =>
+          t.replicatedFrom === id && t.date.startsWith(targetMonth)
+        );
+        if (alreadyReplicated) {
+          return;
+        }
+
         // Calcula a nova data mantendo o dia
         const originalDate = new Date(original.date);
         const [year, month] = targetMonth.split('-').map(Number);
@@ -519,20 +533,42 @@ const Storage = {
 
         const newDate = `${targetMonth}-${String(adjustedDay).padStart(2, '0')}`;
 
-        const newTransaction = this.addTransaction({
+        // Prepara dados da nova transação
+        const newTransactionData = {
           type: original.type,
           value: original.value,
           description: original.description,
           category: original.category,
           date: newDate,
-          paid: false
-        });
+          paid: false,
+          replicatedFrom: id
+        };
 
+        // Se for cartão com parcelas, decrementa
+        if (original.isCard) {
+          newTransactionData.isCard = true;
+          if (original.installments && original.installments > 1) {
+            newTransactionData.installments = original.installments - 1;
+          }
+        }
+
+        const newTransaction = this.addTransaction(newTransactionData);
         replicated.push(newTransaction);
+
+        // Atualiza lista de transações para próximas verificações
+        transactions = this.getTransactions();
       }
     });
 
     return replicated;
+  },
+
+  // Verifica se transação já foi replicada para o mês alvo
+  isAlreadyReplicated(transactionId, targetMonth) {
+    const transactions = this.getTransactions();
+    return transactions.some(t =>
+      t.replicatedFrom === transactionId && t.date.startsWith(targetMonth)
+    );
   },
 
   getNextMonth(currentMonth = null) {

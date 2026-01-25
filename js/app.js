@@ -131,7 +131,16 @@ const App = {
         btn.classList.add('active');
         this.currentTransactionType = btn.dataset.type;
         UI.updateCategorySelect(Storage.getCategories(), this.currentTransactionType);
+        this.toggleCardFields();
       });
+    });
+
+    // Toggle checkbox cartão -> mostrar/ocultar campo de parcelas
+    document.getElementById('transaction-is-card').addEventListener('change', (e) => {
+      document.getElementById('installments-group').style.display = e.target.checked ? 'block' : 'none';
+      if (!e.target.checked) {
+        document.getElementById('transaction-installments').value = '';
+      }
     });
 
     // Cancelar edição
@@ -301,6 +310,22 @@ const App = {
     return Storage.calculateMonthlyBalance(now.getFullYear(), now.getMonth());
   },
 
+  // ===== Campos de Cartão =====
+  toggleCardFields() {
+    const cardFieldGroup = document.getElementById('card-field-group');
+    const installmentsGroup = document.getElementById('installments-group');
+    const isCardCheckbox = document.getElementById('transaction-is-card');
+
+    if (this.currentTransactionType === 'expense') {
+      cardFieldGroup.style.display = 'block';
+    } else {
+      cardFieldGroup.style.display = 'none';
+      installmentsGroup.style.display = 'none';
+      isCardCheckbox.checked = false;
+      document.getElementById('transaction-installments').value = '';
+    }
+  },
+
   // ===== Transações =====
   saveTransaction() {
     const id = document.getElementById('transaction-id').value;
@@ -314,12 +339,21 @@ const App = {
       return;
     }
 
+    // Captura campos de cartão (apenas para despesas)
+    const isCard = this.currentTransactionType === 'expense' &&
+                   document.getElementById('transaction-is-card').checked;
+    const installments = isCard ?
+                         parseInt(document.getElementById('transaction-installments').value) || null :
+                         null;
+
     const transaction = {
       type: this.currentTransactionType,
       value,
       description,
       category,
-      date
+      date,
+      isCard,
+      installments
     };
 
     if (id) {

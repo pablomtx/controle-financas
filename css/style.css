@@ -1582,6 +1582,50 @@ body {
   color: var(--text-secondary);
 }
 
+.replicate-item.last-installment {
+  opacity: 0.5;
+  background: var(--expense-light);
+}
+
+.replicate-item.last-installment:hover {
+  background: var(--expense-light);
+  cursor: not-allowed;
+}
+
+.replicate-card-info {
+  display: block;
+  font-size: 0.7rem;
+  color: #7B1FA2;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.replicate-card-info.last {
+  color: var(--expense);
+}
+
+.replicate-card-info.already {
+  color: var(--income);
+}
+
+.replicate-item.already-replicated {
+  opacity: 0.5;
+  background: var(--income-light);
+}
+
+.replicate-item.already-replicated:hover {
+  background: var(--income-light);
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .replicate-card-info {
+  color: #BA68C8;
+}
+
+[data-theme="dark"] .replicate-card-info.last {
+  color: var(--expense);
+}
+
 /* ===== Toast ===== */
 .toast {
   position: fixed;
@@ -1737,4 +1781,49 @@ body {
 
 .paid-btn.paid svg {
   fill: var(--income);
+}
+
+/* ===== Card Badge ===== */
+.card-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+[data-theme="dark"] .card-badge {
+  background: linear-gradient(135deg, #9C27B0, #BA68C8);
+}
+
+/* ===== Checkbox Label ===== */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  padding: 0.5rem 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  user-select: none;
+}
+
+/* Card field group */
+.card-field {
+  border-top: 1px dashed var(--border);
+  padding-top: 1rem;
+  margin-top: 0.5rem;
 }

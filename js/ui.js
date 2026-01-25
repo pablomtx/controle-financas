@@ -273,13 +273,16 @@ const UI = {
       </div>
     ` : '';
 
+    // Badge de cartão
+    const cardBadge = transaction.isCard ? `<span class="card-badge">💳 ${transaction.installments ? transaction.installments + 'x' : 'Cartão'}</span>` : '';
+
     return `
       <li class="transaction-item ${isPaid ? 'is-paid' : ''} ${transaction.type === 'expense' && !isPaid ? 'unpaid' : ''}">
         <div class="transaction-icon ${transaction.type}">
           ${category.icon || (transaction.type === 'income' ? '💰' : '💸')}
         </div>
         <div class="transaction-details">
-          <span class="transaction-description">${transaction.description}</span>
+          <span class="transaction-description">${transaction.description}${cardBadge}</span>
           <span class="transaction-meta">${category.name} • ${this.formatDate(transaction.date)}${transaction.type === 'expense' ? (isPaid ? ' • ✓ Pago' : ' • Pendente') : ''}</span>
         </div>
         <span class="transaction-value ${transaction.type}">
@@ -517,6 +520,12 @@ const UI = {
 
     // Atualiza categorias para receita
     this.updateCategorySelect(Storage.getCategories(), 'income');
+
+    // Reset campos de cartão
+    document.getElementById('card-field-group').style.display = 'none';
+    document.getElementById('installments-group').style.display = 'none';
+    document.getElementById('transaction-is-card').checked = false;
+    document.getElementById('transaction-installments').value = '';
   },
 
   fillTransactionForm(transaction) {
@@ -538,6 +547,29 @@ const UI = {
     // Atualiza categorias e seleciona a atual
     this.updateCategorySelect(Storage.getCategories(), transaction.type);
     document.getElementById('transaction-category').value = transaction.category;
+
+    // Campos de cartão (apenas para despesas)
+    const cardFieldGroup = document.getElementById('card-field-group');
+    const installmentsGroup = document.getElementById('installments-group');
+    const isCardCheckbox = document.getElementById('transaction-is-card');
+    const installmentsInput = document.getElementById('transaction-installments');
+
+    if (transaction.type === 'expense') {
+      cardFieldGroup.style.display = 'block';
+      isCardCheckbox.checked = transaction.isCard || false;
+      if (transaction.isCard) {
+        installmentsGroup.style.display = 'block';
+        installmentsInput.value = transaction.installments || '';
+      } else {
+        installmentsGroup.style.display = 'none';
+        installmentsInput.value = '';
+      }
+    } else {
+      cardFieldGroup.style.display = 'none';
+      installmentsGroup.style.display = 'none';
+      isCardCheckbox.checked = false;
+      installmentsInput.value = '';
+    }
   },
 
   // ===== Modal =====
@@ -727,6 +759,9 @@ const UI = {
     const modal = document.getElementById('replicate-modal');
     const list = document.getElementById('replicate-list');
 
+    // Determina o mês alvo (próximo mês)
+    const targetMonth = Storage.getNextMonth(currentMonthFilter || Storage.getCurrentMonth());
+
     // Filtra transações do mês selecionado ou do mês atual
     let filtered = transactions;
     if (currentMonthFilter) {
@@ -755,12 +790,36 @@ const UI = {
 
       list.innerHTML = filtered.map(t => {
         const category = Storage.getCategoryById(t.category) || { name: 'Outros', icon: '📦' };
+
+        // Verifica se já foi replicada para o mês alvo
+        const alreadyReplicated = Storage.isAlreadyReplicated(t.id, targetMonth);
+
+        // Info de parcelas de cartão
+        let cardInfo = '';
+        let isLastInstallment = false;
+        let isDisabled = alreadyReplicated;
+
+        if (alreadyReplicated) {
+          cardInfo = '<span class="replicate-card-info already">✓ Já replicada</span>';
+        } else if (t.isCard && t.installments) {
+          if (t.installments <= 1) {
+            cardInfo = '<span class="replicate-card-info last">💳 Última parcela - não será replicada</span>';
+            isLastInstallment = true;
+            isDisabled = true;
+          } else {
+            cardInfo = `<span class="replicate-card-info">💳 ${t.installments}x → ${t.installments - 1}x</span>`;
+          }
+        } else if (t.isCard) {
+          cardInfo = '<span class="replicate-card-info">💳 Cartão</span>';
+        }
+
         return `
-          <div class="replicate-item" data-id="${t.id}">
-            <input type="checkbox" class="replicate-checkbox" data-id="${t.id}">
+          <div class="replicate-item ${isLastInstallment ? 'last-installment' : ''} ${alreadyReplicated ? 'already-replicated' : ''}" data-id="${t.id}">
+            <input type="checkbox" class="replicate-checkbox" data-id="${t.id}" ${isDisabled ? 'disabled' : ''}>
             <div class="replicate-info">
               <span class="replicate-description">${t.description}</span>
               <span class="replicate-meta">${category.icon || ''} ${category.name} • ${this.formatDate(t.date)}</span>
+              ${cardInfo}
             </div>
             <span class="replicate-value ${t.type}">
               ${t.type === 'income' ? '+' : '-'} ${this.formatCurrency(t.value)}
@@ -801,8 +860,11 @@ const UI = {
     const items = document.querySelectorAll('.replicate-item');
     items.forEach(item => {
       const checkbox = item.querySelector('.replicate-checkbox');
-      checkbox.checked = select;
-      item.classList.toggle('selected', select);
+      // Não seleciona itens desabilitados (última parcela)
+      if (!checkbox.disabled) {
+        checkbox.checked = select;
+        item.classList.toggle('selected', select);
+      }
     });
   }
 };
