@@ -3,7 +3,65 @@
 
 const Sync = {
   STORAGE_KEY: 'financas_github_config',
+  DEVICE_ID_KEY: 'financas_device_id',
   GIST_FILENAME: 'controle-financas-data.json',
+
+  // Gera ou obtém ID único do dispositivo
+  getDeviceId() {
+    let deviceId = localStorage.getItem(this.DEVICE_ID_KEY);
+    if (!deviceId) {
+      deviceId = 'dev_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+      localStorage.setItem(this.DEVICE_ID_KEY, deviceId);
+    }
+    return deviceId;
+  },
+
+  // Detecta informações do dispositivo
+  getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let deviceName = 'Desconhecido';
+    let deviceType = 'desktop';
+
+    // Detecta sistema operacional
+    if (/Android/i.test(ua)) {
+      deviceType = 'mobile';
+      deviceName = 'Android';
+      const match = ua.match(/Android\s([0-9.]+)/);
+      if (match) deviceName += ' ' + match[1];
+    } else if (/iPhone|iPad|iPod/i.test(ua)) {
+      deviceType = 'mobile';
+      deviceName = /iPad/i.test(ua) ? 'iPad' : 'iPhone';
+    } else if (/Windows/i.test(ua)) {
+      deviceName = 'Windows';
+    } else if (/Mac/i.test(ua)) {
+      deviceName = 'Mac';
+    } else if (/Linux/i.test(ua)) {
+      deviceName = 'Linux';
+    }
+
+    // Detecta navegador
+    let browser = '';
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+      browser = 'Chrome';
+    } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+      browser = 'Safari';
+    } else if (/Firefox/i.test(ua)) {
+      browser = 'Firefox';
+    } else if (/Edg/i.test(ua)) {
+      browser = 'Edge';
+    }
+
+    if (browser) {
+      deviceName += ' - ' + browser;
+    }
+
+    return {
+      id: this.getDeviceId(),
+      name: deviceName,
+      type: deviceType,
+      userAgent: ua.substring(0, 150)
+    };
+  },
 
   // Obtém configuração salva
   getConfig() {
@@ -108,7 +166,17 @@ const Sync = {
   },
 
   // Obtém todos os dados para sincronizar
-  getAllData() {
+  getAllData(existingDevices = []) {
+    const deviceInfo = this.getDeviceInfo();
+    const now = new Date().toISOString();
+
+    // Atualiza lista de dispositivos
+    const devices = existingDevices.filter(d => d.id !== deviceInfo.id);
+    devices.push({
+      ...deviceInfo,
+      lastSync: now
+    });
+
     return {
       transactions: Storage.getTransactions(),
       categories: Storage.getCategories(),
@@ -117,8 +185,36 @@ const Sync = {
       savingsHistory: Storage.getSavingsHistory(),
       settings: Storage.getSettings(),
       fixedExpenses: Storage.getFixedExpenses(),
-      syncedAt: new Date().toISOString()
+      devices: devices,
+      syncedAt: now
     };
+  },
+
+  // Obtém lista de dispositivos do Gist
+  async getDevices() {
+    const config = this.getConfig();
+    if (!config) return [];
+
+    try {
+      const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+        headers: {
+          'Authorization': `token ${config.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (!response.ok) return [];
+
+      const gist = await response.json();
+      const file = gist.files[this.GIST_FILENAME];
+      if (!file) return [];
+
+      const data = JSON.parse(file.content);
+      return data.devices || [];
+    } catch (error) {
+      console.error('Erro ao obter dispositivos:', error);
+      return [];
+    }
   },
 
   // Envia dados para o Gist
@@ -129,6 +225,9 @@ const Sync = {
     }
 
     try {
+      // Primeiro obtém dispositivos existentes
+      const existingDevices = await this.getDevices();
+
       const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
         method: 'PATCH',
         headers: {
@@ -139,7 +238,7 @@ const Sync = {
         body: JSON.stringify({
           files: {
             [this.GIST_FILENAME]: {
-              content: JSON.stringify(this.getAllData(), null, 2)
+              content: JSON.stringify(this.getAllData(existingDevices), null, 2)
             }
           }
         })

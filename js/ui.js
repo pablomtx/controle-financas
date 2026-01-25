@@ -866,5 +866,47 @@ const UI = {
         item.classList.toggle('selected', select);
       }
     });
+  },
+
+  // ===== Dispositivos Sincronizados =====
+  updateDevicesList(devices) {
+    const list = document.getElementById('devices-list');
+    const emptyMsg = document.getElementById('no-devices-msg');
+
+    if (!devices || devices.length === 0) {
+      list.innerHTML = '';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+
+    emptyMsg.style.display = 'none';
+    const currentDeviceId = Sync.getDeviceId();
+
+    // Ordena por última sincronização (mais recente primeiro)
+    const sorted = [...devices].sort((a, b) => new Date(b.lastSync) - new Date(a.lastSync));
+
+    list.innerHTML = sorted.map(device => {
+      const isCurrentDevice = device.id === currentDeviceId;
+      const lastSync = new Date(device.lastSync);
+      const formattedDate = lastSync.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const icon = device.type === 'mobile' ? '📱' : '💻';
+
+      return `
+        <li class="device-item ${isCurrentDevice ? 'current-device' : ''}">
+          <div class="device-icon">${icon}</div>
+          <div class="device-info">
+            <span class="device-name">${device.name}${isCurrentDevice ? ' <span class="device-badge">Este dispositivo</span>' : ''}</span>
+            <span class="device-meta">Última sincronização: ${formattedDate}</span>
+          </div>
+        </li>
+      `;
+    }).join('');
   }
 };

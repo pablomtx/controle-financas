@@ -832,7 +832,7 @@ const App = {
   },
 
   // ===== Sincronização =====
-  updateSyncStatus() {
+  async updateSyncStatus() {
     const notConfigured = document.getElementById('sync-not-configured');
     const configured = document.getElementById('sync-configured');
     const lastSyncEl = document.getElementById('last-sync');
@@ -845,6 +845,10 @@ const App = {
       if (lastSync) {
         lastSyncEl.textContent = `Última sincronização: ${lastSync}`;
       }
+
+      // Carrega lista de dispositivos
+      const devices = await Sync.getDevices();
+      UI.updateDevicesList(devices);
     } else {
       notConfigured.style.display = 'block';
       configured.style.display = 'none';

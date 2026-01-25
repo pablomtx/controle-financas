@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdiciona suporte a despesas de cartão de crédito com parcelas\n\n- Checkbox de cartão aparece apenas para despesas\n- Campo de parcelas restantes quando cartão está marcado\n- Badge visual mostrando parcelas \\(ex: 💳 12x\\)\n- Parcelas decrementam automaticamente ao replicar\n- Última parcela não é replicada\n- Impede replicar mesma transação duas vezes para o mesmo mês\n- Corrige bug do filtro de meses \\(getMonth +1\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
