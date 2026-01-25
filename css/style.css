@@ -103,6 +103,7 @@ body {
 .btn-icon svg {
   width: 24px;
   height: 24px;
+  pointer-events: none;
 }
 
 .icon-moon {
