@@ -8,8 +8,7 @@ const Storage = {
     GOALS: 'financas_goals',
     SETTINGS: 'financas_settings',
     SAVINGS: 'financas_savings',
-    SAVINGS_HISTORY: 'financas_savings_history',
-    FIXED_EXPENSES: 'financas_fixed_expenses'
+    SAVINGS_HISTORY: 'financas_savings_history'
   },
 
   // Categorias padrão
@@ -254,107 +253,6 @@ const Storage = {
     const history = this.getSavingsHistory();
     const filtered = history.filter(h => h.id !== id);
     this.saveSavingsHistory(filtered);
-  },
-
-  // ===== Despesas Fixas =====
-  getFixedExpenses() {
-    const data = localStorage.getItem(this.KEYS.FIXED_EXPENSES);
-    return data ? JSON.parse(data) : [];
-  },
-
-  saveFixedExpenses(expenses) {
-    localStorage.setItem(this.KEYS.FIXED_EXPENSES, JSON.stringify(expenses));
-  },
-
-  addFixedExpense(expense) {
-    const expenses = this.getFixedExpenses();
-    expense.id = this.generateId();
-    expense.createdAt = new Date().toISOString();
-    expenses.push(expense);
-    this.saveFixedExpenses(expenses);
-    return expense;
-  },
-
-  updateFixedExpense(id, updates) {
-    const expenses = this.getFixedExpenses();
-    const index = expenses.findIndex(e => e.id === id);
-    if (index !== -1) {
-      expenses[index] = { ...expenses[index], ...updates };
-      this.saveFixedExpenses(expenses);
-      return expenses[index];
-    }
-    return null;
-  },
-
-  deleteFixedExpense(id) {
-    const expenses = this.getFixedExpenses();
-    const filtered = expenses.filter(e => e.id !== id);
-    this.saveFixedExpenses(filtered);
-    return filtered;
-  },
-
-  getFixedExpenseById(id) {
-    const expenses = this.getFixedExpenses();
-    return expenses.find(e => e.id === id);
-  },
-
-  // Gera transações das despesas fixas desde o mês de início até o mês atual
-  generateFixedExpensesTransactions() {
-    const fixedExpenses = this.getFixedExpenses();
-    if (fixedExpenses.length === 0) return;
-
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-
-    let transactions = this.getTransactions();
-
-    fixedExpenses.forEach(expense => {
-      const startMonth = expense.startMonth || currentMonth;
-
-      // Gera transações para cada mês desde o início até o mês atual
-      const [startYear, startMon] = startMonth.split('-').map(Number);
-      let year = startYear;
-      let month = startMon;
-
-      while (true) {
-        const monthKey = `${year}-${String(month).padStart(2, '0')}`;
-
-        // Para se passou do mês atual
-        if (monthKey > currentMonth) break;
-
-        // Verifica se já existe transação dessa despesa fixa neste mês
-        const alreadyExists = transactions.some(t =>
-          t.fixedExpenseId === expense.id &&
-          t.date.startsWith(monthKey)
-        );
-
-        if (!alreadyExists) {
-          // Cria a transação
-          const lastDayOfMonth = new Date(year, month, 0).getDate();
-          const day = Math.min(expense.dueDay, lastDayOfMonth);
-          const date = `${monthKey}-${String(day).padStart(2, '0')}`;
-
-          const newTransaction = this.addTransaction({
-            type: 'expense',
-            value: expense.value,
-            description: `${expense.description} (Fixa)`,
-            category: expense.category,
-            date: date,
-            fixedExpenseId: expense.id
-          });
-
-          // Atualiza a lista de transações para verificação
-          transactions = this.getTransactions();
-        }
-
-        // Próximo mês
-        month++;
-        if (month > 12) {
-          month = 1;
-          year++;
-        }
-      }
-    });
   },
 
   // ===== Cálculos =====
@@ -611,7 +509,6 @@ const Storage = {
       settings: this.getSettings(),
       savings: this.getSavings(),
       savingsHistory: this.getSavingsHistory(),
-      fixedExpenses: this.getFixedExpenses(),
       exportedAt: new Date().toISOString()
     };
   },
@@ -635,9 +532,6 @@ const Storage = {
     if (data.savingsHistory) {
       this.saveSavingsHistory(data.savingsHistory);
     }
-    if (data.fixedExpenses) {
-      this.saveFixedExpenses(data.fixedExpenses);
-    }
   },
 
   clearAllData() {
@@ -647,6 +541,5 @@ const Storage = {
     localStorage.removeItem(this.KEYS.SETTINGS);
     localStorage.removeItem(this.KEYS.SAVINGS);
     localStorage.removeItem(this.KEYS.SAVINGS_HISTORY);
-    localStorage.removeItem(this.KEYS.FIXED_EXPENSES);
   }
 };

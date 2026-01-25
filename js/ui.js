@@ -613,65 +613,6 @@ const UI = {
     }, 3000);
   },
 
-  // ===== Despesas Fixas =====
-  updateFixedExpensesList(expenses) {
-    const list = document.getElementById('fixed-expenses-list');
-    const emptyMsg = document.getElementById('no-fixed-expenses-msg');
-
-    if (expenses.length === 0) {
-      list.innerHTML = '';
-      emptyMsg.style.display = 'block';
-      return;
-    }
-
-    emptyMsg.style.display = 'none';
-    const categories = Storage.getCategories();
-
-    list.innerHTML = expenses.map(expense => {
-      const category = categories.find(c => c.id === expense.category) || { name: 'Outros', color: '#607D8B', icon: '📦' };
-      const startMonth = expense.startMonth ? this.formatMonthYear(expense.startMonth + '-01') : 'Sempre';
-      return `
-        <li class="fixed-expense-item">
-          <div class="fixed-expense-info">
-            <span class="fixed-expense-icon" style="background: ${category.color}">${category.icon || '📦'}</span>
-            <div class="fixed-expense-details">
-              <span class="fixed-expense-description">${expense.description}</span>
-              <span class="fixed-expense-meta">${category.name} • Dia ${expense.dueDay} • Início: ${startMonth}</span>
-            </div>
-          </div>
-          <div class="fixed-expense-actions">
-            <span class="fixed-expense-value">${this.formatCurrency(expense.value)}</span>
-            <button class="delete-fixed-expense" onclick="App.confirmDeleteFixedExpense('${expense.id}')" title="Excluir">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        </li>
-      `;
-    }).join('');
-  },
-
-  updateFixedExpenseCategorySelect(categories) {
-    const select = document.getElementById('fixed-expense-category');
-    const expenseCategories = categories.filter(c =>
-      !['salario', 'investimentos'].includes(c.id)
-    );
-
-    select.innerHTML = `<option value="">Categoria</option>` +
-      expenseCategories.map(c => `<option value="${c.id}">${c.icon || ''} ${c.name}</option>`).join('');
-  },
-
-  resetFixedExpenseForm() {
-    document.getElementById('fixed-expense-form').reset();
-    document.getElementById('fixed-expense-id').value = '';
-    // Define o mês atual como padrão
-    const now = new Date();
-    const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    document.getElementById('fixed-expense-start').value = currentMonth;
-  },
-
   // ===== Tema =====
   setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);

@@ -20,9 +20,6 @@ const App = {
       }
     }
 
-    // Gera transações das despesas fixas do mês
-    Storage.generateFixedExpensesTransactions();
-
     this.refreshAll();
     this.setDefaultDate();
     UI.initMoneyMasks();
@@ -86,16 +83,12 @@ const App = {
     if (Sync.isConfigured()) {
       const result = await Sync.pull();
       if (result.success) {
-        // Gera transações das despesas fixas
-        Storage.generateFixedExpensesTransactions();
         this.refreshAll();
         UI.showToast('Atualizado!', 'success');
       } else {
         UI.showToast('Erro ao sincronizar', 'error');
       }
     } else {
-      // Apenas atualiza os dados locais
-      Storage.generateFixedExpensesTransactions();
       this.refreshAll();
       UI.showToast('Atualizado!', 'success');
     }
@@ -204,12 +197,6 @@ const App = {
       this.addCategory();
     });
 
-    // Formulário de despesa fixa
-    document.getElementById('fixed-expense-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      this.saveFixedExpense();
-    });
-
     // Botões de saldo guardado
     document.getElementById('savings-deposit-btn').addEventListener('click', () => {
       this.depositSavings();
@@ -293,9 +280,6 @@ const App = {
       this.updateGoals();
     } else if (screen === 'settings') {
       UI.updateCategoriesList(Storage.getCategories());
-      UI.updateFixedExpensesList(Storage.getFixedExpenses());
-      UI.updateFixedExpenseCategorySelect(Storage.getCategories());
-      UI.resetFixedExpenseForm();
       this.updateSavingsDisplay();
       this.updateSyncStatus();
     }
@@ -648,49 +632,6 @@ const App = {
           UI.updateCategorySelect(Storage.getCategories(), this.currentTransactionType);
           Sync.autoSync();
         }
-      }
-    );
-  },
-
-  // ===== Despesas Fixas =====
-  saveFixedExpense() {
-    const description = document.getElementById('fixed-expense-description').value.trim();
-    const value = UI.parseMoneyValue(document.getElementById('fixed-expense-value').value);
-    const category = document.getElementById('fixed-expense-category').value;
-    const dueDay = parseInt(document.getElementById('fixed-expense-day').value);
-    const startMonth = document.getElementById('fixed-expense-start').value;
-
-    if (!description || !value || !category || !dueDay || !startMonth) {
-      UI.showToast('Preencha todos os campos', 'error');
-      return;
-    }
-
-    if (dueDay < 1 || dueDay > 31) {
-      UI.showToast('Dia deve ser entre 1 e 31', 'error');
-      return;
-    }
-
-    Storage.addFixedExpense({ description, value, category, dueDay, startMonth });
-
-    // Gera a transação para o mês atual (se aplicável)
-    Storage.generateFixedExpensesTransactions();
-
-    UI.showToast('Despesa fixa adicionada!', 'success');
-    UI.resetFixedExpenseForm();
-    UI.updateFixedExpensesList(Storage.getFixedExpenses());
-    this.refreshAll();
-    Sync.autoSync();
-  },
-
-  confirmDeleteFixedExpense(id) {
-    UI.showModal(
-      'Excluir Despesa Fixa',
-      'Tem certeza que deseja excluir esta despesa fixa?',
-      () => {
-        Storage.deleteFixedExpense(id);
-        UI.showToast('Despesa fixa excluída!', 'success');
-        UI.updateFixedExpensesList(Storage.getFixedExpenses());
-        Sync.autoSync();
       }
     );
   },

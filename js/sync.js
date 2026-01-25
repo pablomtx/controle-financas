@@ -251,7 +251,6 @@ const Sync = {
       savings: Storage.getSavings(),
       savingsHistory: Storage.getSavingsHistory(),
       settings: Storage.getSettings(),
-      fixedExpenses: Storage.getFixedExpenses(),
       devices: devices,
       syncedAt: now
     };
@@ -386,7 +385,6 @@ const Sync = {
       if (data.savings !== undefined) Storage.setSavings(data.savings);
       if (data.savingsHistory) Storage.saveSavingsHistory(data.savingsHistory);
       if (data.settings) Storage.saveSettings(data.settings);
-      if (data.fixedExpenses) Storage.saveFixedExpenses(data.fixedExpenses);
 
       // Atualiza última sincronização
       config.lastSync = new Date().toISOString();

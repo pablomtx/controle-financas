@@ -1353,85 +1353,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* ===== Fixed Expenses List ===== */
-.fixed-expenses-list {
-  list-style: none;
-  margin-top: 1rem;
-}
-
-.fixed-expense-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.fixed-expense-item:last-child {
-  border-bottom: none;
-}
-
-.fixed-expense-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.fixed-expense-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.fixed-expense-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.fixed-expense-description {
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.fixed-expense-meta {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.fixed-expense-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.fixed-expense-value {
-  font-weight: 600;
-  color: var(--expense);
-}
-
-.delete-fixed-expense {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-}
-
-.delete-fixed-expense:hover {
-  color: var(--expense);
-  background: var(--expense-light);
-}
-
-.fixed-expense-form .form-row {
-  margin-bottom: 0.75rem;
-}
-
 /* ===== Goal Add Savings ===== */
 .goal-add-savings {
   margin-top: 0.75rem;
@@ -1800,7 +1721,6 @@ body {
 .values-hidden .goal-item-numbers .target,
 .values-hidden .goal-item-numbers .remaining,
 .values-hidden .goal-item-footer .monthly,
-.values-hidden .fixed-expense-value,
 .values-hidden .category-amount,
 .values-hidden .current-savings strong,
 .values-hidden .savings-modal-info {
