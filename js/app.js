@@ -79,6 +79,28 @@ const App = {
     }
   },
 
+  async refreshApp() {
+    UI.showToast('Atualizando...', 'info');
+
+    // Se tiver sincronização configurada, sincroniza primeiro
+    if (Sync.isConfigured()) {
+      const result = await Sync.pull();
+      if (result.success) {
+        // Gera transações das despesas fixas
+        Storage.generateFixedExpensesTransactions();
+        this.refreshAll();
+        UI.showToast('Atualizado!', 'success');
+      } else {
+        UI.showToast('Erro ao sincronizar', 'error');
+      }
+    } else {
+      // Apenas atualiza os dados locais
+      Storage.generateFixedExpensesTransactions();
+      this.refreshAll();
+      UI.showToast('Atualizado!', 'success');
+    }
+  },
+
   initTheme() {
     UI.initTheme();
   },
@@ -105,6 +127,11 @@ const App = {
 
     document.getElementById('next-month-btn').addEventListener('click', () => {
       this.changeDashboardMonth(1);
+    });
+
+    // Botão atualizar
+    document.getElementById('refresh-app').addEventListener('click', () => {
+      this.refreshApp();
     });
 
     // Toggle tema
