@@ -292,6 +292,12 @@ const Sync = {
     }
 
     try {
+      // Verifica se dispositivo está bloqueado
+      const isBlocked = await this.isDeviceBlocked();
+      if (isBlocked) {
+        return { success: false, error: 'Dispositivo bloqueado', blocked: true };
+      }
+
       // Primeiro obtém dispositivos existentes
       const existingDevices = await this.getDevices();
 
@@ -327,6 +333,18 @@ const Sync = {
     }
   },
 
+  // Verifica se o dispositivo está bloqueado
+  async isDeviceBlocked() {
+    try {
+      const devices = await this.getDevices();
+      const deviceId = this.getDeviceId();
+      const device = devices.find(d => d.id === deviceId);
+      return device && device.blocked === true;
+    } catch (error) {
+      return false;
+    }
+  },
+
   // Baixa dados do Gist
   async pull() {
     const config = this.getConfig();
@@ -335,6 +353,12 @@ const Sync = {
     }
 
     try {
+      // Verifica se dispositivo está bloqueado
+      const isBlocked = await this.isDeviceBlocked();
+      if (isBlocked) {
+        return { success: false, error: 'Dispositivo bloqueado', blocked: true };
+      }
+
       const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
         headers: {
           'Authorization': `token ${config.token}`,

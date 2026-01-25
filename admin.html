@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Admin - Controle de Finanças</title>
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --surface: #16213e;
+      --surface-light: #1f2b47;
+      --primary: #e94560;
+      --primary-dark: #c73e54;
+      --success: #4ecca3;
+      --warning: #ffc107;
+      --text: #eaeaea;
+      --text-secondary: #a0a0a0;
+      --border: #2a3a5a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+    }
+
+    header p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card h2 .icon {
+      font-size: 1.25rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-light);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--surface-light);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-danger {
+      background: #c0392b;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #a93226;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #1a1a2e;
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .status {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .status.connected {
+      background: rgba(78, 204, 163, 0.15);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .status.disconnected {
+      background: rgba(233, 69, 96, 0.15);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .device-list {
+      list-style: none;
+    }
+
+    .device-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--surface-light);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .device-item.blocked {
+      opacity: 0.6;
+      border-color: var(--primary);
+    }
+
+    .device-item.current {
+      border-color: var(--success);
+    }
+
+    .device-icon {
+      font-size: 1.5rem;
+    }
+
+    .device-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .device-name {
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .device-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .badge-current {
+      background: var(--success);
+      color: #1a1a2e;
+    }
+
+    .badge-blocked {
+      background: var(--primary);
+      color: white;
+    }
+
+    .device-meta {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .device-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .device-actions .btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .links-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .links-list a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface-light);
+      border-radius: 8px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+    }
+
+    .links-list a:hover {
+      background: var(--border);
+    }
+
+    .links-list a .arrow {
+      margin-left: auto;
+      color: var(--text-secondary);
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 100;
+      border: 1px solid var(--border);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: var(--success);
+    }
+
+    .toast.error {
+      border-color: var(--primary);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .section-login, .section-admin {
+      display: none;
+    }
+
+    .section-login.active, .section-admin.active {
+      display: block;
+    }
+
+    .info-box {
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid var(--warning);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.8rem;
+      color: var(--warning);
+      margin-top: 1rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: var(--surface-light);
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 480px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .device-item {
+        flex-wrap: wrap;
+      }
+
+      .device-actions {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .device-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Painel Admin</h1>
+      <p>Controle de Finanças - Gerenciamento</p>
+    </header>
+
+    <!-- Login Section -->
+    <section class="section-login active" id="section-login">
+      <div class="card">
+        <h2><span class="icon">🔐</span> Autenticação</h2>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          Digite o token do GitHub para acessar o painel admin.
+        </p>
+        <div class="form-group">
+          <label for="token-input">Token do GitHub</label>
+          <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="Admin.login()">
+          Entrar
+        </button>
+        <div class="info-box">
+          <strong>Dica:</strong> Use o mesmo token configurado no app de finanças.
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Section -->
+    <section class="section-admin" id="section-admin">
+      <div id="status-box" class="status connected">
+        Conectado como <strong id="username-display">-</strong>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-devices">0</div>
+          <div class="stat-label">Dispositivos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-transactions">0</div>
+          <div class="stat-label">Transações</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-blocked">0</div>
+          <div class="stat-label">Bloqueados</div>
+        </div>
+      </div>
+
+      <!-- Devices -->
+      <div class="card">
+        <h2><span class="icon">📱</span> Dispositivos Sincronizados</h2>
+        <ul class="device-list" id="device-list">
+          <li class="empty-msg">Carregando...</li>
+        </ul>
+      </div>
+
+      <!-- GitHub Links -->
+      <div class="card">
+        <h2><span class="icon">🔑</span> Gerenciar Tokens no GitHub</h2>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
+          Para revogar ou criar tokens, acesse diretamente o GitHub:
+        </p>
+        <div class="links-list">
+          <a href="https://github.com/settings/tokens" target="_blank">
+            📋 Ver todos os tokens
+            <span class="arrow">→</span>
+          </a>
+          <a href="https://github.com/settings/tokens/new?scopes=gist&description=Controle%20Financas" target="_blank">
+            ➕ Criar novo token
+            <span class="arrow">→</span>
+          </a>
+        </div>
+        <div class="info-box">
+          <strong>Para bloquear um dispositivo perdido:</strong><br>
+          1. Revogue o token atual no GitHub<br>
+          2. Crie um novo token<br>
+          3. Reconfigure nos dispositivos que deseja manter
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="card">
+        <h2><span class="icon">⚙️</span> Ações</h2>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <button class="btn btn-secondary btn-block" onclick="Admin.refresh()">
+            🔄 Atualizar Lista
+          </button>
+          <button class="btn btn-secondary btn-block" onclick="Admin.logout()">
+            🚪 Sair do Painel
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const Admin = {
+      GIST_FILENAME: 'controle-financas-data.json',
+      token: null,
+      gistId: null,
+      data: null,
+
+      async login() {
+        const token = document.getElementById('token-input').value.trim();
+        if (!token) {
+          this.showToast('Digite o token', 'error');
+          return;
+        }
+
+        this.showToast('Verificando...', 'info');
+
+        try {
+          // Verifica token
+          const userResponse = await fetch('https://api.github.com/user', {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          if (!userResponse.ok) {
+            throw new Error('Token inválido');
+          }
+
+          const user = await userResponse.json();
+
+          // Procura o Gist
+          const gistsResponse = await fetch('https://api.github.com/gists', {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          const gists = await gistsResponse.json();
+          let gistId = null;
+
+          for (const gist of gists) {
+            if (gist.files && gist.files[this.GIST_FILENAME]) {
+              gistId = gist.id;
+              break;
+            }
+          }
+
+          if (!gistId) {
+            throw new Error('Nenhum dado de sincronização encontrado');
+          }
+
+          this.token = token;
+          this.gistId = gistId;
+
+          document.getElementById('username-display').textContent = user.login;
+          document.getElementById('section-login').classList.remove('active');
+          document.getElementById('section-admin').classList.add('active');
+
+          this.showToast('Conectado!', 'success');
+          this.loadData();
+
+        } catch (error) {
+          this.showToast(error.message, 'error');
+        }
+      },
+
+      logout() {
+        this.token = null;
+        this.gistId = null;
+        this.data = null;
+        document.getElementById('token-input').value = '';
+        document.getElementById('section-admin').classList.remove('active');
+        document.getElementById('section-login').classList.add('active');
+      },
+
+      async loadData() {
+        try {
+          const response = await fetch(`https://api.github.com/gists/${this.gistId}`, {
+            headers: {
+              'Authorization': `token ${this.token}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+
+          if (!response.ok) throw new Error('Erro ao carregar dados');
+
+          const gist = await response.json();
+          const file = gist.files[this.GIST_FILENAME];
+          if (!file) throw new Error('Arquivo não encontrado');
+
+          this.data = JSON.parse(file.content);
+          this.renderDevices();
+          this.updateStats();
+
+        } catch (error) {
+          this.showToast(error.message, 'error');
+        }
+      },
+
+      updateStats() {
+        const devices = this.data.devices || [];
+        const blocked = devices.filter(d => d.blocked).length;
+        const transactions = this.data.transactions || [];
+
+        document.getElementById('stat-devices').textContent = devices.length;
+        document.getElementById('stat-transactions').textContent = transactions.length;
+        document.getElementById('stat-blocked').textContent = blocked;
+      },
+
+      renderDevices() {
+        const list = document.getElementById('device-list');
+        const devices = this.data.devices || [];
+
+        if (devices.length === 0) {
+          list.innerHTML = '<li class="empty-msg">Nenhum dispositivo sincronizado</li>';
+          return;
+        }
+
+        // Ordena por última sincronização
+        const sorted = [...devices].sort((a, b) => new Date(b.lastSync) - new Date(a.lastSync));
+
+        list.innerHTML = sorted.map(device => {
+          const lastSync = new Date(device.lastSync);
+          const formattedDate = lastSync.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const icon = device.type === 'mobile' ? '📱' : '💻';
+          const isBlocked = device.blocked || false;
+
+          const badges = [];
+          if (isBlocked) {
+            badges.push('<span class="device-badge badge-blocked">BLOQUEADO</span>');
+          }
+
+          return `
+            <li class="device-item ${isBlocked ? 'blocked' : ''}">
+              <div class="device-icon">${icon}</div>
+              <div class="device-info">
+                <div class="device-name">
+                  ${device.name}
+                  ${badges.join('')}
+                </div>
+                <div class="device-meta">
+                  Última sincronização: ${formattedDate}<br>
+                  ID: ${device.id.substring(0, 15)}...
+                </div>
+              </div>
+              <div class="device-actions">
+                ${isBlocked
+                  ? `<button class="btn btn-success" onclick="Admin.unblockDevice('${device.id}')">Desbloquear</button>`
+                  : `<button class="btn btn-danger" onclick="Admin.blockDevice('${device.id}')">Bloquear</button>`
+                }
+                <button class="btn btn-secondary" onclick="Admin.removeDevice('${device.id}')">Remover</button>
+              </div>
+            </li>
+          `;
+        }).join('');
+      },
+
+      async blockDevice(deviceId) {
+        const devices = this.data.devices || [];
+        const device = devices.find(d => d.id === deviceId);
+        if (device) {
+          device.blocked = true;
+          await this.saveData();
+          this.showToast('Dispositivo bloqueado!', 'success');
+          this.renderDevices();
+          this.updateStats();
+        }
+      },
+
+      async unblockDevice(deviceId) {
+        const devices = this.data.devices || [];
+        const device = devices.find(d => d.id === deviceId);
+        if (device) {
+          device.blocked = false;
+          await this.saveData();
+          this.showToast('Dispositivo desbloqueado!', 'success');
+          this.renderDevices();
+          this.updateStats();
+        }
+      },
+
+      async removeDevice(deviceId) {
+        if (!confirm('Tem certeza que deseja remover este dispositivo?')) return;
+
+        this.data.devices = (this.data.devices || []).filter(d => d.id !== deviceId);
+        await this.saveData();
+        this.showToast('Dispositivo removido!', 'success');
+        this.renderDevices();
+        this.updateStats();
+      },
+
+      async saveData() {
+        try {
+          await fetch(`https://api.github.com/gists/${this.gistId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `token ${this.token}`,
+              'Accept': 'application/vnd.github.v3+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              files: {
+                [this.GIST_FILENAME]: {
+                  content: JSON.stringify(this.data, null, 2)
+                }
+              }
+            })
+          });
+        } catch (error) {
+          this.showToast('Erro ao salvar', 'error');
+        }
+      },
+
+      refresh() {
+        this.showToast('Atualizando...', 'info');
+        this.loadData().then(() => {
+          this.showToast('Atualizado!', 'success');
+        });
+      },
+
+      showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000);
+      }
+    };
+  </script>
+</body>
+</html>
