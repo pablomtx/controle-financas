@@ -65,8 +65,9 @@ const Storage = {
   getTransactionsByMonth(year, month) {
     const transactions = this.getTransactions();
     return transactions.filter(t => {
-      const date = new Date(t.date);
-      return date.getFullYear() === year && date.getMonth() === month;
+      // Extrai ano e mês diretamente da string para evitar problemas de fuso horário
+      const [tYear, tMonth] = t.date.split('-').map(Number);
+      return tYear === year && tMonth === month;
     });
   },
 
@@ -473,12 +474,12 @@ const Storage = {
 
     for (let i = months - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const balance = this.calculateMonthlyBalance(date.getFullYear(), date.getMonth());
+      const balance = this.calculateMonthlyBalance(date.getFullYear(), date.getMonth() + 1);
 
       data.push({
         month: date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
         year: date.getFullYear(),
-        monthIndex: date.getMonth(),
+        monthIndex: date.getMonth() + 1,
         income: balance.income,
         expense: balance.expense
       });

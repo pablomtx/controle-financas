@@ -310,7 +310,7 @@ const App = {
 
   getCurrentMonthBalance() {
     const now = new Date();
-    return Storage.calculateMonthlyBalance(now.getFullYear(), now.getMonth());
+    return Storage.calculateMonthlyBalance(now.getFullYear(), now.getMonth() + 1);
   },
 
   // ===== Campos de Cartão =====
