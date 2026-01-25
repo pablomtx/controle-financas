@@ -290,9 +290,12 @@ const App = {
     const upcomingDue = Storage.getUpcomingDueExpenses(3);
     UI.updateDueExpensesAlert(upcomingDue);
 
-    // Transações
-    UI.updateTransactionsList(transactions);
+    // Transações - mantém o filtro atual
+    const currentFilter = document.getElementById('filter-month').value;
+    UI.updateTransactionsList(transactions, currentFilter);
     UI.updateMonthFilters(months);
+    // Restaura o filtro após atualizar as opções
+    document.getElementById('filter-month').value = currentFilter;
     UI.updateCategorySelect(categories, this.currentTransactionType);
 
     // Metas
