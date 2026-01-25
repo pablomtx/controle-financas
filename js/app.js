@@ -932,22 +932,7 @@ const App = {
     }
   },
 
-  async removeDevice(deviceId) {
-    UI.showModal(
-      'Remover Dispositivo',
-      'Deseja remover este dispositivo da lista? Ele será adicionado novamente se sincronizar.',
-      async () => {
-        UI.showToast('Removendo...', 'info');
-        const result = await Sync.removeDevice(deviceId);
-        if (result.success) {
-          UI.showToast('Dispositivo removido!', 'success');
-          this.updateSyncStatus();
-        } else {
-          UI.showToast('Erro ao remover', 'error');
-        }
-      }
-    );
-  },
+  // Função removeDevice removida - disponível apenas no painel admin
 
   removeSync() {
     UI.showModal(
