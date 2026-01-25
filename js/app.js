@@ -920,6 +920,35 @@ const App = {
     }
   },
 
+  renameDevice() {
+    const currentName = Sync.getCustomDeviceName() || '';
+    const newName = prompt('Digite o nome para este dispositivo:', currentName);
+
+    if (newName !== null) {
+      Sync.setCustomDeviceName(newName.trim() || null);
+      UI.showToast(newName.trim() ? 'Nome atualizado!' : 'Nome removido!', 'success');
+      // Sincroniza para atualizar o nome na nuvem
+      this.syncNow();
+    }
+  },
+
+  async removeDevice(deviceId) {
+    UI.showModal(
+      'Remover Dispositivo',
+      'Deseja remover este dispositivo da lista? Ele será adicionado novamente se sincronizar.',
+      async () => {
+        UI.showToast('Removendo...', 'info');
+        const result = await Sync.removeDevice(deviceId);
+        if (result.success) {
+          UI.showToast('Dispositivo removido!', 'success');
+          this.updateSyncStatus();
+        } else {
+          UI.showToast('Erro ao remover', 'error');
+        }
+      }
+    );
+  },
+
   removeSync() {
     UI.showModal(
       'Desconectar Sincronização',

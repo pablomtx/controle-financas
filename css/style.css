@@ -1281,6 +1281,30 @@ body {
   color: var(--text-secondary);
 }
 
+.device-actions {
+  flex-shrink: 0;
+}
+
+.device-action-btn {
+  background: none;
+  border: none;
+  padding: 0.4rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.device-action-btn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.device-action-btn.delete:hover {
+  background: var(--expense-light);
+  color: var(--expense);
+}
+
 .categories-list {
   list-style: none;
 }

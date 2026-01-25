@@ -16,6 +16,20 @@ const Sync = {
     return deviceId;
   },
 
+  // Obtém nome personalizado do dispositivo
+  getCustomDeviceName() {
+    return localStorage.getItem('financas_device_name') || null;
+  },
+
+  // Salva nome personalizado do dispositivo
+  setCustomDeviceName(name) {
+    if (name) {
+      localStorage.setItem('financas_device_name', name);
+    } else {
+      localStorage.removeItem('financas_device_name');
+    }
+  },
+
   // Detecta informações do dispositivo
   getDeviceInfo() {
     const ua = navigator.userAgent;
@@ -55,12 +69,65 @@ const Sync = {
       deviceName += ' - ' + browser;
     }
 
+    // Usa nome personalizado se existir
+    const customName = this.getCustomDeviceName();
+
     return {
       id: this.getDeviceId(),
-      name: deviceName,
+      name: customName || deviceName,
+      autoName: deviceName,
       type: deviceType,
       userAgent: ua.substring(0, 150)
     };
+  },
+
+  // Remove um dispositivo da lista
+  async removeDevice(deviceId) {
+    const config = this.getConfig();
+    if (!config) return { success: false };
+
+    try {
+      const devices = await this.getDevices();
+      const filtered = devices.filter(d => d.id !== deviceId);
+
+      // Atualiza o Gist com a lista filtrada
+      const response = await fetch(`https://api.github.com/gists/${config.gistId}`, {
+        headers: {
+          'Authorization': `token ${config.token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (!response.ok) return { success: false };
+
+      const gist = await response.json();
+      const file = gist.files[this.GIST_FILENAME];
+      if (!file) return { success: false };
+
+      const data = JSON.parse(file.content);
+      data.devices = filtered;
+
+      await fetch(`https://api.github.com/gists/${config.gistId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${config.token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          files: {
+            [this.GIST_FILENAME]: {
+              content: JSON.stringify(data, null, 2)
+            }
+          }
+        })
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao remover dispositivo:', error);
+      return { success: false };
+    }
   },
 
   // Obtém configuração salva
