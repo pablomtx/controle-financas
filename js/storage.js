@@ -234,6 +234,24 @@ const Storage = {
     const newSavings = currentSavings - value;
     this.setSavings(newSavings);
 
+    // Subtrai das metas, começando pela meta com maior saldo acumulado
+    let remainingToWithdraw = value;
+    const goals = this.getGoals();
+
+    // Ordena por currentAmount decrescente (maior primeiro)
+    const sortedGoals = [...goals].sort((a, b) => (b.currentAmount || 0) - (a.currentAmount || 0));
+
+    for (const goal of sortedGoals) {
+      if (remainingToWithdraw <= 0) break;
+
+      const goalAmount = goal.currentAmount || 0;
+      if (goalAmount > 0) {
+        const toSubtract = Math.min(goalAmount, remainingToWithdraw);
+        this.updateGoal(goal.id, { currentAmount: goalAmount - toSubtract });
+        remainingToWithdraw -= toSubtract;
+      }
+    }
+
     // Adiciona ao histórico
     const history = this.getSavingsHistory();
     history.push({
