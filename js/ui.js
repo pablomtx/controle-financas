@@ -493,6 +493,8 @@ const UI = {
     document.getElementById('goal-id').value = '';
     document.getElementById('goal-form-title').textContent = 'Nova Meta';
     document.getElementById('cancel-goal').style.display = 'none';
+    document.getElementById('goal-current-group').style.display = 'none';
+    document.getElementById('goal-current-amount').value = '';
   },
 
   fillGoalForm(goal) {
@@ -500,6 +502,8 @@ const UI = {
     document.getElementById('goal-name').value = goal.name;
     document.getElementById('goal-value').value = parseFloat(goal.targetAmount).toFixed(2);
     document.getElementById('goal-months').value = goal.months;
+    document.getElementById('goal-current-amount').value = parseFloat(goal.currentAmount || 0).toFixed(2);
+    document.getElementById('goal-current-group').style.display = 'block';
     document.getElementById('goal-form-title').textContent = 'Editar Meta';
     document.getElementById('cancel-goal').style.display = 'block';
   },

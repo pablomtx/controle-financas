@@ -464,9 +464,9 @@ const App = {
     }
 
     if (id) {
-      // Editando meta existente
-      const existingGoal = Storage.getGoalById(id);
-      Storage.updateGoal(id, { name, targetAmount, months });
+      // Editando meta existente - também atualiza o valor guardado
+      const currentAmount = UI.parseMoneyValue(document.getElementById('goal-current-amount').value) || 0;
+      Storage.updateGoal(id, { name, targetAmount, months, currentAmount });
       UI.showToast('Meta atualizada!', 'success');
     } else {
       // Nova meta
